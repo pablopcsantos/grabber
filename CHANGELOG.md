@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.4-dev
+
+- novo modo **API JSON** na GUI e na CLI;
+- descoberta recursiva de URLs de arquivos em objetos/listas JSON;
+- reconhecimento automático de respostas JSON no modo Automático;
+- paginação JSON simples por campos como `next`, `next_url` e `next_page`;
+- novo teste de integração para API JSON com estrutura aninhada e paginação;
+- item de APIs JSON do Marco 6 marcado como implementado;
+- seção **Identidade visual e ícone** removida do README.
+
 ## 0.3.3-dev
 
 - botões contextuais **?** adicionados aos campos menos intuitivos da tela de configuração;
