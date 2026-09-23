@@ -19,7 +19,7 @@ def parse_args():
     p.add_argument("--url", action="append", default=[], help="Página inicial. Pode repetir.")
     p.add_argument("--link-file", help="TXT com URLs diretas, uma por linha.")
     p.add_argument("--output", default="./downloads")
-    p.add_argument("--mode", choices=["auto", "generic", "phocadownload", "advanced"], default="auto")
+    p.add_argument("--mode", choices=["auto", "generic", "phocadownload", "api-json", "advanced"], default="auto")
     p.add_argument("--css-selector", default="")
     p.add_argument("--href-regex", default="")
     p.add_argument("--crawl-depth", type=int, default=0)
