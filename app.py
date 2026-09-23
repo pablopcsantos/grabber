@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-"""
-Grabber
-
-GUI portátil para descoberta e download em massa de arquivos públicos em websites.
-A aplicação separa descoberta, revisão dos links e download, com estratégias para
-HTML genérico, Joomla/PhocaDownload, regras CSS/regex, sondagem HTTP opcional e
-adaptadores externos carregáveis.
-"""
+# Grabber
+# Aplicação desktop portátil desenvolvida de forma independente por
+# Pablo Phillipe Cândido dos Santos para descobrir, revisar e baixar arquivos
+# públicos em massa a partir de websites e APIs JSON.
+# O desenvolvimento contou com ferramentas de inteligência artificial generativa
+# como recurso auxiliar, mantendo-se sob responsabilidade do autor a concepção,
+# implementação, integração e verificação do projeto.
+# Currículo Lattes: http://lattes.cnpq.br/9500873674712528
 
 import json
 import os
