@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.3-dev
+
+- botões contextuais **?** adicionados aos campos menos intuitivos da tela de configuração;
+- pop-ups explicativos para modo, profundidade, limite de páginas, domínio, `robots.txt`, sondagem, pausa, CSS, regex, concorrência, tentativas e timeout;
+- README passa a explicar que não há plugins Grabber de terceiros validados e recomenda o Playwright da Microsoft como candidato confiável a uma futura integração opcional para sites JavaScript-heavy;
+- IADES e Edudata registrados como retestes com descoberta de arquivos bem-sucedida;
+- Strix continua indisponível após três tentativas; a URL específica também apresentou HTTP 502 em verificação independente.
+
 ## 0.3.2-dev
 
 - domínio raiz e variante `www.` passam a ser tratados como o mesmo site na restrição de domínio;
