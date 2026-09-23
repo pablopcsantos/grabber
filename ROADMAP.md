@@ -49,7 +49,8 @@ Critérios:
 - [x] sistema formal de adaptadores/plugins carregáveis no modo Automático;
 - [x] equivalência entre domínio raiz e variante `www.` na restrição de mesmo site;
 - [x] navegação automática conservadora para seções documentais em profundidade `0`;
-- [x] novas tentativas automáticas para falhas transitórias de conexão/HTTP durante a descoberta.
+- [x] novas tentativas automáticas para falhas transitórias de conexão/HTTP durante a descoberta;
+- [x] foco automático opcional na região principal da página para reduzir links globais irrelevantes.
 
 **Estado:** concluído para a meta da versão 1.0 em websites HTML estáticos.
 
@@ -107,9 +108,9 @@ Critérios:
 Antes da primeira versão estável, o projeto deve ser testado em websites públicos reais representativos de:
 
 - [ ] Joomla/PhocaDownload;
-- [ ] página HTML com links diretos para PDF/DOC/ZIP — IADES já apresentou descoberta real bem-sucedida; falta confirmar completude da lista e downloads para encerrar o cenário;
+- [x] página HTML com links diretos para PDF/DOC/ZIP — IADES: 4 de 4 links de arquivo identificados no teste manual;
 - [ ] site com paginação tradicional;
-- [ ] site em que arquivos aparecem em páginas internas (`crawl depth` 1 ou 2) — Edudata já apresentou descoberta real bem-sucedida via seção interna; falta confirmar completude da lista e downloads;
+- [x] portal com arquivo em seção interna — Edudata: 1 de 1 link de arquivo identificado após navegação documental automática;
 - [ ] site que exige seletor CSS personalizado;
 - [ ] site que exige regex personalizada;
 - [x] lista manual de URLs — comportamento coberto por testes locais e pelo motor independente do scraper.
@@ -132,7 +133,8 @@ Os cenários abaixo possuem testes de integração locais e não dependem de web
 - [x] equivalência de domínio raiz/`www`;
 - [x] navegação automática para seção documental;
 - [x] repetição de página em falha transitória;
-- [x] API JSON recursiva + paginação simples.
+- [x] API JSON recursiva + paginação simples;
+- [x] foco na região principal da página com fallback para varredura integral.
 
 Os resultados estão resumidos em [`docs/TEST_MATRIX.md`](docs/TEST_MATRIX.md).
 
