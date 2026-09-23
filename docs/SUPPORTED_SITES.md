@@ -142,3 +142,60 @@ A página possui uma seção pública de **Links e Arquivos**, mas vários docum
 A partir da versão `0.3.1-dev`, o Grabber reconhece esse padrão de URL embutida e extrai o endereço direto do documento quando ele possui extensão de arquivo conhecida.
 
 **Estado do teste:** parcial. A estrutura da página e o bloqueio por `robots.txt` foram observados, mas não foi registrado como teste de download bem-sucedido porque, com a política padrão, a coleta foi corretamente interrompida.
+
+
+---
+
+## Casos reais observados: IADES, Edudata e Strix
+
+### IADES
+
+Teste informado em **23/09/2026**:
+
+```text
+https://iades.com.br/inscricao/ProcessoSeletivo.aspx?id=a4918d948c
+```
+
+A página expõe documentos em PDF, mas os links utilizam a variante `www.iades.com.br` enquanto a URL inicial pode ser aberta em `iades.com.br`.
+
+Antes da versão `0.3.2-dev`, a opção de mesmo domínio tratava essas duas formas como hosts diferentes e podia descartar os PDFs.
+
+A partir de `0.3.2-dev`, o Grabber considera o domínio raiz e sua variante `www.` equivalentes para a restrição de mesmo site.
+
+**Estado:** correção implementada; ainda requer novo teste manual do Grabber para ser contabilizado como cenário real concluído.
+
+### Edudata
+
+Teste informado em **23/09/2026**:
+
+```text
+https://www.edudata.com.br/sabara27/sabara27_portal.asp
+```
+
+A página inicial funciona como portal e não apresenta necessariamente o PDF diretamente. A seção **Edital** fica em uma página interna, por exemplo:
+
+```text
+sabara27_portal.asp?p=edit
+```
+
+e nela existe o link para o edital em PDF.
+
+A partir de `0.3.2-dev`, o modo Automático pode seguir, mesmo com profundidade `0`, um único nível de links que pareçam claramente seções documentais, como **Edital**, **Documentos**, **Arquivos**, **Resultados**, **Gabaritos** e **Cronograma**.
+
+**Estado:** correção genérica implementada; ainda requer novo teste manual para ser contabilizado como cenário real concluído.
+
+### Strix Educação
+
+Teste informado em **23/09/2026**:
+
+```text
+https://strixeducacao.com.br/evento/unit-processo-seletivo-unificado-de-medicina-2027-1-aracaju-se-e-goiana-pe/
+```
+
+O Grabber recebeu falha de conexão ao abrir a página. Uma verificação independente da mesma URL também encontrou falha de gateway, enquanto páginas de listagem do mesmo domínio e eventos anteriores estavam acessíveis.
+
+Isso sugere que o problema pode ser transitório ou específico da infraestrutura/rota dessa página, e não necessariamente uma falha da descoberta HTML.
+
+A partir de `0.3.2-dev`, a descoberta repete automaticamente falhas de conexão, timeout, HTTP 429 e erros HTTP 500/502/503/504 com pequeno intervalo progressivo.
+
+**Estado:** resiliência melhorada, mas a compatibilidade dessa URL continua pendente de novo teste. O projeto não tenta contornar WAF, CAPTCHA ou mecanismos antibot.
