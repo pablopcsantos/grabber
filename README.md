@@ -30,6 +30,7 @@ A GUI foi desenvolvida em Tkinter com estilo próprio e organização em painéi
 Características atuais:
 
 - **modo escuro como padrão**;
+- pequenos botões **?** ao lado das configurações menos intuitivas, abrindo explicações contextuais sem sair da tela;
 - modo claro selecionável em `Configurações → Aparência`;
 - preferência visual salva junto ao executável, para acompanhar o usuário em um pendrive;
 - seleção de página web ou arquivo TXT com URLs;
@@ -113,6 +114,17 @@ Na versão portátil, crie a mesma pasta ao lado de `Grabber.exe`.
 Um plugin pode reconhecer links de arquivo e, opcionalmente, uma regra de paginação. A API está documentada em [`plugins/README.md`](plugins/README.md).
 
 > **Segurança:** plugins são módulos Python executados no mesmo processo do Grabber. Use somente plugins de fontes confiáveis.
+
+### Integrações externas recomendadas
+
+No momento, **não existe um plugin de terceiros para a API específica do Grabber que tenha sido validado pelo projeto**. Por isso, o README não recomenda baixar adaptadores aleatórios da internet e executá-los como plugins.
+
+A integração externa mais interessante e confiável para uma futura extensão é o **Playwright for Python**, mantido pela Microsoft:
+
+- documentação oficial: https://playwright.dev/python/
+- repositório oficial: https://github.com/microsoft/playwright-python
+
+O Playwright automatiza navegadores Chromium, Firefox e WebKit e seria útil para sites em que os links só aparecem após a execução de JavaScript. Ele **não é atualmente um plugin drop-in do Grabber** e ainda não vem incluído no executável portátil, porque exige dependências e binários de navegador adicionais. A intenção é avaliá-lo futuramente como um adaptador opcional, sem aumentar desnecessariamente o tamanho da versão básica do programa.
 
 ---
 
@@ -230,6 +242,25 @@ A interface é organizada em três abas: **Configuração**, **Arquivos encontra
 11. A barra de progresso mostra quantos downloads foram concluídos.
 12. Se necessário, use **Cancelar operação**; downloads incompletos `.part` são descartados com segurança.
 13. Confira `_relatorio_download.csv` na pasta de saída.
+
+### Ajuda contextual na tela
+
+Os campos mais técnicos da aba **Configuração** possuem um pequeno botão **?** ao lado do nome. Clique nele para abrir uma explicação curta sobre:
+
+- modo de descoberta;
+- profundidade;
+- limite máximo de páginas;
+- restrição ao mesmo domínio;
+- `robots.txt`;
+- sondagem `HEAD`/`Content-Type`;
+- pausa entre páginas;
+- seletor CSS;
+- regex do `href`;
+- downloads simultâneos;
+- tentativas;
+- timeout.
+
+Essas janelas também indicam valores usuais, situações em que o campo deve ser alterado e quando é melhor deixar o valor padrão.
 
 ### Histórico opcional
 
