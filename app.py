@@ -37,7 +37,7 @@ from core import (
 
 
 APP_NAME = "Grabber"
-APP_VERSION = "0.3.3-dev"
+APP_VERSION = "0.3.4-dev"
 
 THEMES = {
     "dark": {
@@ -60,6 +60,7 @@ MODE_LABEL_TO_KEY = {
     "Automático (recomendado)": "auto",
     "HTML genérico / links diretos": "generic",
     "Joomla / PhocaDownload": "phocadownload",
+    "API JSON": "api-json",
     "Avançado: seletor CSS / regex": "advanced",
 }
 
@@ -397,6 +398,7 @@ class App(tk.Tk):
             "Automático (recomendado): combina as regras nativas, navegação documental e plugins confiáveis.\n\n"
             "HTML genérico: procura links diretos em páginas HTML convencionais.\n\n"
             "Joomla / PhocaDownload: prioriza o padrão ?download= usado por esse componente.\n\n"
+            "API JSON: lê uma resposta JSON e procura recursivamente URLs de arquivos, incluindo paginação simples por campos como next/next_url.\n\n"
             "Avançado: permite restringir a descoberta com seletor CSS e/ou regex."
         ).grid(row=2, column=0, sticky="w")
         ttk.Combobox(strategy, textvariable=self.mode_var, values=tuple(MODE_LABEL_TO_KEY), state="readonly", width=32).grid(
