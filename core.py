@@ -42,6 +42,13 @@ DOWNLOAD_QUERY_HINTS = {
     "download", "file", "arquivo", "attachment", "document", "doc", "media",
 }
 
+# Alguns portais não apontam diretamente para o arquivo. Em vez disso, o href
+# abre um visualizador HTML e inclui a URL real do documento em um parâmetro.
+# Ex.: viewer/index.html?file=https://site/documento.pdf
+EMBEDDED_FILE_QUERY_HINTS = {
+    "file", "url", "src", "document", "doc", "media", "target", "download",
+}
+
 KNOWN_FILE_EXTENSIONS = {
     ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
     ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2",
@@ -116,6 +123,7 @@ class DiscoveryResult:
     cancelled: bool = False
     probes_performed: int = 0
     plugins_loaded: list[str] = field(default_factory=list)
+    robots_blocked: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -212,6 +220,23 @@ def looks_like_direct_file(url: str) -> bool:
 def has_download_query(url: str) -> bool:
     query = parse_qs(urlparse(url).query)
     return any(key.lower() in DOWNLOAD_QUERY_HINTS for key in query)
+
+
+def unwrap_embedded_file_url(url: str) -> str:
+    """Extrai a URL real quando um visualizador HTML a recebe pela query string."""
+    parsed = urlparse(url)
+    query = parse_qs(parsed.query)
+    for key, values in query.items():
+        if key.lower() not in EMBEDDED_FILE_QUERY_HINTS:
+            continue
+        for raw in values:
+            raw = unquote((raw or "").strip())
+            if not raw:
+                continue
+            nested = normalize_url(url, raw)
+            if nested and looks_like_direct_file(nested):
+                return nested
+    return url
 
 
 def is_phocadownload_link(url: str) -> bool:
@@ -410,6 +435,7 @@ def discover_links(
         if options.respect_robots and not robots.allowed(url):
             msg = f"robots.txt não permite coletar: {url}"
             result.warnings.append(msg)
+            result.robots_blocked.append(url)
             log(f"[IGNORADO] {msg}")
             continue
 
@@ -439,9 +465,12 @@ def discover_links(
                 result.cancelled = True
                 break
 
-            full = normalize_url(resp.url, anchor.get("href", ""))
-            if not full:
+            raw_full = normalize_url(resp.url, anchor.get("href", ""))
+            if not raw_full:
                 continue
+            full = unwrap_embedded_file_url(raw_full)
+            if full != raw_full:
+                detected.add("embedded-file")
             if options.same_domain_only and not any(same_site(seed, full) for seed in start_urls):
                 continue
 
