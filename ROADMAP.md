@@ -46,7 +46,10 @@ Critérios:
 - [x] opção de limitar ao mesmo domínio;
 - [x] opção de respeitar `robots.txt`;
 - [x] sondagem opcional de links ambíguos por `HEAD`/`Content-Type`, com fallback controlado para `GET` quando `HEAD` não é aceito;
-- [x] sistema formal de adaptadores/plugins carregáveis no modo Automático.
+- [x] sistema formal de adaptadores/plugins carregáveis no modo Automático;
+- [x] equivalência entre domínio raiz e variante `www.` na restrição de mesmo site;
+- [x] navegação automática conservadora para seções documentais em profundidade `0`;
+- [x] novas tentativas automáticas para falhas transitórias de conexão/HTTP durante a descoberta.
 
 **Estado:** concluído para a meta da versão 1.0 em websites HTML estáticos.
 
@@ -123,7 +126,10 @@ Os cenários abaixo possuem testes de integração locais e não dependem de web
 - [x] plugin externo carregável;
 - [x] cancelamento de descoberta;
 - [x] download + relatório + progresso determinístico;
-- [x] cancelamento de downloads.
+- [x] cancelamento de downloads;
+- [x] equivalência de domínio raiz/`www`;
+- [x] navegação automática para seção documental;
+- [x] repetição de página em falha transitória.
 
 Os resultados estão resumidos em [`docs/TEST_MATRIX.md`](docs/TEST_MATRIX.md).
 
