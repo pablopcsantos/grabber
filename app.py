@@ -37,7 +37,7 @@ from core import (
 
 
 APP_NAME = "Grabber"
-APP_VERSION = "0.3.0-dev"
+APP_VERSION = "0.3.1-dev"
 
 THEMES = {
     "dark": {
@@ -402,7 +402,7 @@ class App(tk.Tk):
         ttk.Spinbox(strategy, from_=1, to=1000, textvariable=self.max_pages_var, width=8).grid(row=2, column=5, sticky="w", padx=(8, 0))
 
         ttk.Checkbutton(strategy, text="Restringir ao mesmo domínio", variable=self.same_domain_var).grid(row=3, column=0, columnspan=2, sticky="w", pady=(10, 0))
-        ttk.Checkbutton(strategy, text="Respeitar robots.txt", variable=self.robots_var).grid(row=3, column=2, columnspan=2, sticky="w", pady=(10, 0))
+        ttk.Checkbutton(strategy, text="Respeitar robots.txt (recomendado)", variable=self.robots_var).grid(row=3, column=2, columnspan=2, sticky="w", pady=(10, 0))
         ttk.Checkbutton(
             strategy,
             text="Sondar links ambíguos (HEAD/Content-Type)",
@@ -765,10 +765,23 @@ class App(tk.Tk):
                 f"Foram encontrados {len(self.links)} arquivo(s) candidato(s).\n\nRevise a tabela e desmarque o que não deseja baixar.",
             )
         else:
-            messagebox.showwarning(
-                "Nenhum arquivo encontrado",
-                "Nenhum link de arquivo foi reconhecido com a estratégia atual. Tente outro modo, aumente a profundidade, habilite a sondagem ou use um seletor CSS/regex.",
-            )
+            if result.robots_blocked:
+                messagebox.showwarning(
+                    "Coleta não permitida pelo robots.txt",
+                    (
+                        "O Grabber não analisou a página porque o robots.txt do site "
+                        "não autoriza a coleta automática dessa URL.\n\n"
+                        "Isso é uma política publicada pelo próprio site, não um erro do programa. "
+                        "A opção 'Respeitar robots.txt' permanece habilitada por padrão.\n\n"
+                        "Se você tiver autorização ou uma razão legítima para fazer a coleta mesmo assim, "
+                        "pode desabilitar manualmente essa opção na aba Configuração e executar novamente."
+                    ),
+                )
+            else:
+                messagebox.showwarning(
+                    "Nenhum arquivo encontrado",
+                    "Nenhum link de arquivo foi reconhecido com a estratégia atual. Tente outro modo, aumente a profundidade, habilite a sondagem ou use um seletor CSS/regex.",
+                )
 
     def _start_download(self) -> None:
         if self.running:
