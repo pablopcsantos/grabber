@@ -41,6 +41,19 @@ DOCUMENT_SECTION_HINTS = (
     "publicação", "publicações", "publicacao", "publicacoes",
 )
 
+PRIMARY_CONTENT_SELECTORS = (
+    "main",
+    '[role="main"]',
+    "article",
+    ".entry-content",
+    ".page-content",
+    ".post-content",
+    ".content-area",
+    ".main-content",
+    "#main-content",
+    "#content",
+)
+
 DOWNLOAD_TEXT_HINTS = (
     "download", "baixar", "arquivo", "documento", "anexo", "exportar", "salvar",
 )
@@ -124,6 +137,7 @@ class DiscoveryOptions:
     probe_timeout: int = 8
     plugin_dir: str = ""
     smart_section_navigation: bool = True
+    prefer_main_content: bool = True
     page_retries: int = 2
     page_timeout: int = 30
 
@@ -381,6 +395,31 @@ def find_next_page_url(soup: BeautifulSoup, base_url: str) -> str | None:
 def _compile_href_regex(pattern: str) -> re.Pattern[str] | None:
     pattern = pattern.strip()
     return re.compile(pattern, re.IGNORECASE) if pattern else None
+
+
+def find_primary_content_scope(soup: BeautifulSoup):
+    """Localiza uma região semântica central para evitar menus/rodapés globais.
+
+    A heurística só é aplicada no modo Automático e sempre pode ser desativada.
+    Se nenhuma região reconhecível existir, o documento inteiro continua sendo
+    analisado.
+    """
+    for selector in PRIMARY_CONTENT_SELECTORS:
+        nodes = [
+            node for node in soup.select(selector)
+            if node.find("a", href=True) is not None
+        ]
+        if not nodes:
+            continue
+        best = max(
+            nodes,
+            key=lambda node: (
+                len(node.find_all("a", href=True)),
+                len(node.get_text(" ", strip=True)),
+            ),
+        )
+        return best, selector
+    return None, ""
 
 
 def _anchors_for_mode(soup: BeautifulSoup, options: DiscoveryOptions):
@@ -668,7 +707,22 @@ def discover_links(
             continue
 
         soup = BeautifulSoup(resp.text, "html.parser")
-        anchors = _anchors_for_mode(soup, options)
+        scan_scope = soup
+        focus_label = ""
+        if options.mode == "auto" and options.prefer_main_content:
+            focused, focus_label = find_primary_content_scope(soup)
+            if focused is not None:
+                scan_scope = focused
+                detected.add("main-content")
+                total_links = len(soup.find_all("a", href=True))
+                focused_links = len(scan_scope.find_all("a", href=True))
+                if focused_links < total_links:
+                    log(
+                        f"  [FOCO] conteúdo principal detectado ({focus_label}); "
+                        f"analisando {focused_links} de {total_links} link(s) da página."
+                    )
+
+        anchors = _anchors_for_mode(scan_scope, options)
         new_count = 0
 
         for anchor in anchors:
@@ -756,7 +810,7 @@ def discover_links(
         if result.cancelled:
             break
 
-        next_url = find_next_page_url(soup, resp.url)
+        next_url = find_next_page_url(scan_scope, resp.url)
         if not next_url and options.mode == "auto" and adapters:
             for adapter in adapters:
                 try:
