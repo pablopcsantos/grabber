@@ -131,7 +131,8 @@ Os cenários abaixo possuem testes de integração locais e não dependem de web
 - [x] cancelamento de downloads;
 - [x] equivalência de domínio raiz/`www`;
 - [x] navegação automática para seção documental;
-- [x] repetição de página em falha transitória.
+- [x] repetição de página em falha transitória;
+- [x] API JSON recursiva + paginação simples.
 
 Os resultados estão resumidos em [`docs/TEST_MATRIX.md`](docs/TEST_MATRIX.md).
 
@@ -144,7 +145,7 @@ Os resultados estão resumidos em [`docs/TEST_MATRIX.md`](docs/TEST_MATRIX.md).
 Estes recursos não são necessários para a primeira versão estável, mas definem o caminho para versões posteriores:
 
 - [ ] websites renderizados por JavaScript com navegador automatizado opcional (ex.: Playwright);
-- [ ] adaptadores nativos para APIs JSON;
+- [x] suporte nativo genérico a APIs JSON — extração recursiva de URLs de arquivos e paginação simples por campos como `next`/`next_url`;
 - [ ] autenticação/cookies importados de forma explícita pelo usuário;
 - [ ] URLs assinadas ou temporárias;
 - [ ] filas e perfis de coleta reutilizáveis;
