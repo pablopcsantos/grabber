@@ -443,6 +443,12 @@ Endpoint de API JSON:
 python cli.py --url "https://exemplo.org/api/documentos" --mode api-json --dry-run
 ```
 
+Desativar o foco no conteúdo principal e analisar também menus/rodapés:
+
+```bash
+python cli.py --url "URL" --scan-whole-page --dry-run
+```
+
 ---
 
 ## Versão portátil para pendrive
@@ -563,12 +569,13 @@ Recursos como Playwright, autenticação genérica, URLs assinadas e integraçõ
 
 ## Testes automatizados
 
-O núcleo possui testes de integração locais, sem depender de websites externos. Eles cobrem atualmente **15 cenários**:
+O núcleo possui testes de integração locais, sem depender de websites externos. Eles cobrem atualmente **16 cenários**:
 
 - links diretos + paginação;
 - equivalência entre domínio raiz e variante `www.`;
 - navegação automática para uma seção documental em profundidade `0`;
 - repetição de abertura após falhas HTTP transitórias;
+- foco automático na região principal da página, com opção de varrer a página inteira;
 - rastreamento interno por profundidade;
 - adaptador PhocaDownload;
 - descoberta recursiva e paginação simples em API JSON;
