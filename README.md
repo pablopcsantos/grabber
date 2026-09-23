@@ -62,6 +62,12 @@ Modo recomendado para a maioria dos casos. Atualmente combina:
 - URLs de arquivos embutidas em visualizadores HTML, quando aparecem em parâmetros como `file=` ou `url=`;
 - adaptadores Python confiáveis presentes na pasta `plugins/`.
 
+O modo automático também trata algumas diferenças comuns entre sites reais:
+
+- considera o domínio raiz e sua variante `www.` como o mesmo website para a restrição de domínio;
+- pode seguir automaticamente **um nível** de links que parecem levar a seções documentais, como “Edital”, “Documentos”, “Arquivos”, “Resultados”, “Gabaritos” ou “Cronograma”, mesmo quando a profundidade geral está em `0`;
+- repete automaticamente a abertura de páginas em falhas transitórias de conexão e em respostas HTTP como 429, 500, 502, 503 e 504.
+
 O usuário também pode habilitar uma **sondagem opcional por `HEAD`/`Content-Type`** para botões de download cuja URL não possui extensão ou parâmetro reconhecido. A sondagem fica desativada por padrão porque gera requisições adicionais.
 
 ### HTML genérico / links diretos
@@ -116,8 +122,8 @@ Por padrão, a ferramenta analisa apenas a página inicial e paginações reconh
 
 A opção **Profundidade** permite seguir páginas internas no mesmo domínio:
 
-- `0`: somente a página fornecida e sua paginação;
-- `1`: também analisa links internos encontrados nela;
+- `0`: a página fornecida, paginações reconhecidas e, no modo Automático, uma navegação conservadora de um nível para seções claramente documentais;
+- `1`: também analisa os demais links internos encontrados nela;
 - `2+`: continua aprofundando o rastreamento.
 
 Use profundidades maiores com cautela e mantenha um limite de páginas apropriado.
@@ -237,11 +243,13 @@ Essa opção é voluntária. O histórico pode ser apagado pelo mesmo menu e fic
 
 Se nenhum arquivo for encontrado:
 
-1. tente o modo **HTML genérico / links diretos**;
-2. aumente a profundidade para `1`;
-3. procure no HTML um contêiner apropriado e informe um seletor CSS;
-4. utilize uma regex para o padrão das URLs;
-5. se os links só surgirem depois de JavaScript, a versão atual provavelmente não é adequada para aquele site.
+1. confira o painel **Atividade** para saber se houve bloqueio por `robots.txt`, falha de conexão ou resposta HTTP;
+2. tente o modo **HTML genérico / links diretos**;
+3. aumente a profundidade para `1`;
+4. procure no HTML um contêiner apropriado e informe um seletor CSS;
+5. utilize uma regex para o padrão das URLs;
+6. habilite a sondagem de links ambíguos quando houver botões de download sem extensão;
+7. se os links só surgirem depois de JavaScript, a versão atual provavelmente não é adequada para aquele site.
 
 ---
 
@@ -513,14 +521,19 @@ Recursos como Playwright, APIs JSON, autenticação e URLs assinadas permanecem 
 
 ## Testes automatizados
 
-O núcleo possui testes de integração locais, sem depender de websites externos. Eles cobrem atualmente **9 cenários**:
+O núcleo possui testes de integração locais, sem depender de websites externos. Eles cobrem atualmente **14 cenários**:
 
 - links diretos + paginação;
+- equivalência entre domínio raiz e variante `www.`;
+- navegação automática para uma seção documental em profundidade `0`;
+- repetição de abertura após falhas HTTP transitórias;
 - rastreamento interno por profundidade;
 - adaptador PhocaDownload;
 - seletor CSS + regex;
 - sondagem `HEAD`/`Content-Type` de link ambíguo;
 - plugin externo carregável;
+- URL de arquivo embutida em visualizador;
+- respeito e registro de bloqueio por `robots.txt`;
 - cancelamento da descoberta;
 - download, relatório CSV e callback de progresso;
 - cancelamento dos downloads.
