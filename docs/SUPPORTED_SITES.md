@@ -37,6 +37,20 @@ Uma regex pode filtrar os `href`, por exemplo:
 /downloads/.*\.pdf(?:\?.*)?$
 ```
 
+### APIs JSON públicas
+
+O modo **API JSON** pode localizar arquivos em endpoints públicos que retornem URLs em objetos ou listas JSON. A busca é recursiva e não depende do nome exato do campo.
+
+Também há suporte inicial a paginação simples por campos como:
+
+```text
+next
+next_url
+next_page
+```
+
+Esse modo funciona melhor quando os valores retornados já contêm URLs diretas ou caminhos relativos para arquivos reconhecíveis.
+
 ### Lista pronta de URLs
 
 Quando os links diretos já são conhecidos, o scraper pode ser ignorado completamente. Um TXT com uma URL por linha utiliza apenas o motor genérico de download.
@@ -85,9 +99,9 @@ Possíveis evoluções futuras:
 
 Esses recursos ainda não fazem parte do núcleo atual.
 
-### APIs JSON
+### APIs JSON complexas ou autenticadas
 
-Se uma página obtém seus documentos exclusivamente por API, o motor de download continua reaproveitável, mas a descoberta deve ganhar um adaptador para aquela API.
+O suporte genérico atual cobre endpoints públicos com URLs de arquivos em objetos/listas e paginação simples. APIs que exigem autenticação, tokens, cabeçalhos proprietários, GraphQL, POST obrigatório ou esquemas de paginação específicos ainda podem exigir um adaptador dedicado.
 
 ### Websites com login
 
