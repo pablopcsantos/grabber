@@ -73,6 +73,12 @@ O Grabber tenta primeiro `HEAD`. Se o servidor não aceitar esse método, pode r
 
 É possível aumentar a **profundidade de rastreamento** para seguir páginas internas no mesmo domínio. Deve-se usar limites conservadores de páginas para evitar percorrer áreas desnecessárias do site.
 
+### Foco no conteúdo principal
+
+No modo **Automático**, o Grabber tenta priorizar regiões semânticas como `<main>`, `<article>` e contêineres de conteúdo comuns. O objetivo é evitar que arquivos presentes em menus, rodapés e áreas globais do portal sejam misturados aos documentos da página consultada.
+
+A opção **Priorizar conteúdo principal** fica habilitada por padrão. Se um site realmente mantiver os arquivos fora da região central, ela pode ser desativada. Na CLI, use `--scan-whole-page`.
+
 ### Paginações incomuns
 
 A ferramenta reconhece `rel="next"` e vários rótulos comuns. Se um CMS tiver regras próprias, um plugin externo pode acrescentar `find_next_page` sem alterar o núcleo.
@@ -213,3 +219,46 @@ Isso sugere que o problema pode ser transitório ou específico da infraestrutur
 A partir de `0.3.2-dev`, a descoberta repete automaticamente falhas de conexão, timeout, HTTP 429 e erros HTTP 500/502/503/504 com pequeno intervalo progressivo.
 
 **Estado:** no novo teste, as três tentativas do Grabber falharam por conexão. Uma verificação independente da URL específica também retornou HTTP 502, embora páginas de listagem do domínio continuassem acessíveis. A compatibilidade desse evento permanece pendente; o projeto não tenta contornar WAF, CAPTCHA ou mecanismos antibot.
+
+
+---
+
+## Casos reais observados: Unicamp, Vunesp e UnirG
+
+### FCM/Unicamp
+
+Teste informado em **23/09/2026**:
+
+```text
+https://portal.fcm.unicamp.br/residencias-em-saude/residencia-medica/processo-seletivo-2027/
+```
+
+O Grabber encontrou diversos PDFs ligados ao processo seletivo, mas também alguns documentos aparentemente externos ao contexto imediato da página. Esse resultado mostrou que, em portais grandes, varrer todas as âncoras do HTML pode incluir arquivos de áreas globais.
+
+**Estado:** descoberta funcional, porém com excesso de candidatos. A versão `0.3.5-dev` adicionou foco automático na região principal da página. Reteste pendente.
+
+### Vunesp
+
+Teste informado em **23/09/2026**:
+
+```text
+https://www.vunesp.com.br/FMJU2602
+```
+
+O servidor respondeu com **HTTP 403 (acesso negado)** nas tentativas do Grabber, antes da etapa de análise dos links.
+
+**Estado:** não compatível pelo método HTTP atual nesse teste. O Grabber não tenta contornar autenticação, WAF, CAPTCHA ou mecanismos antibot.
+
+### UnirG
+
+Teste informado em **23/09/2026**:
+
+```text
+https://www.unirg.edu.br/residencia-medica
+```
+
+O Grabber encontrou os documentos diretamente relacionados à Residência Médica, mas também uma grande quantidade de arquivos de Pesquisa, Reitoria, documentos institucionais e outras áreas do portal.
+
+A página possui uma área central específica de Residência Médica e, ao mesmo tempo, extensa navegação global do site. A versão `0.3.5-dev` passou a priorizar automaticamente a região principal quando ela pode ser identificada semanticamente, reduzindo a chance de coletar arquivos globais não relacionados.
+
+**Estado:** melhoria implementada; reteste manual necessário para medir a redução dos falsos positivos.
