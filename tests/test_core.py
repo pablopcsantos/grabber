@@ -101,6 +101,12 @@ class CoreIntegrationTests(unittest.TestCase):
             '{"items":[{"url":"files/c.docx"}]}',
             encoding="utf-8",
         )
+        (root / "focused.html").write_text(
+            '<header><a href="files/b.zip">Arquivo global do menu</a></header>'
+            '<main><h1>Processo seletivo</h1><a href="files/a.pdf">Edital relacionado</a></main>'
+            '<footer><a href="files/c.docx">Arquivo global do rodapé</a></footer>',
+            encoding="utf-8",
+        )
         (root / "plugins" / "special.py").write_text(
             'ADAPTER_NAME = "SpecialTest"\n\n'
             'def match_link(anchor, url, page_url):\n'
@@ -143,6 +149,28 @@ class CoreIntegrationTests(unittest.TestCase):
                 "https://arquivos.exemplo.org/b",
             )
         )
+
+    def test_auto_primary_content_focus_avoids_global_links(self):
+        focused = discover_links(
+            self.session,
+            [self.url("focused.html")],
+            DiscoveryOptions(mode="auto", respect_robots=False, delay=0),
+        )
+        self.assertEqual(len(focused.download_links), 1)
+        self.assertTrue(focused.download_links[0].endswith("/files/a.pdf"))
+        self.assertIn("main-content", focused.detected_mode)
+
+        whole_page = discover_links(
+            self.session,
+            [self.url("focused.html")],
+            DiscoveryOptions(
+                mode="auto",
+                respect_robots=False,
+                delay=0,
+                prefer_main_content=False,
+            ),
+        )
+        self.assertEqual(len(whole_page.download_links), 3)
 
     def test_generic_links_and_pagination(self):
         result = discover_links(
