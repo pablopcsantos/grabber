@@ -49,6 +49,11 @@ DOWNLOAD_QUERY_HINTS = {
     "download", "file", "arquivo", "attachment", "document", "doc", "media",
 }
 
+JSON_NEXT_KEYS = {
+    "next", "next_url", "nexturl", "next_page", "nextpage",
+    "proxima", "próxima", "proxima_url", "próxima_url",
+}
+
 # Alguns portais não apontam diretamente para o arquivo. Em vez disso, o href
 # abre um visualizador HTML e inclui a URL real do documento em um parâmetro.
 # Ex.: viewer/index.html?file=https://site/documento.pdf
@@ -106,7 +111,7 @@ def noop_progress(_: int, __: int, ___: "DownloadResult | None") -> None:
 
 @dataclass
 class DiscoveryOptions:
-    mode: str = "auto"  # auto | generic | phocadownload | advanced
+    mode: str = "auto"  # auto | generic | phocadownload | advanced | api-json
     max_pages: int = 50
     delay: float = 0.7
     same_domain_only: bool = True
@@ -276,6 +281,71 @@ def anchor_is_download_candidate(anchor, full_url: str, options: DiscoveryOption
     if options.allow_query_downloads and has_download_query(full_url):
         return True
     return False
+
+
+def extract_file_links_from_json(data, base_url: str) -> list[str]:
+    """Procura recursivamente URLs de arquivos em objetos JSON."""
+    found: list[str] = []
+    seen: set[str] = set()
+
+    def walk(value) -> None:
+        if isinstance(value, dict):
+            for nested in value.values():
+                walk(nested)
+            return
+        if isinstance(value, (list, tuple)):
+            for nested in value:
+                walk(nested)
+            return
+        if not isinstance(value, str):
+            return
+
+        raw = value.strip()
+        if not raw or len(raw) > 4096:
+            return
+        full = normalize_url(base_url, raw)
+        if not full:
+            return
+        full = unwrap_embedded_file_url(full)
+        if (looks_like_direct_file(full) or has_download_query(full)) and full not in seen:
+            seen.add(full)
+            found.append(full)
+
+    walk(data)
+    return found
+
+
+def extract_json_next_urls(data, base_url: str) -> list[str]:
+    """Reconhece paginação JSON simples por chaves comuns como next/next_url."""
+    found: list[str] = []
+    seen: set[str] = set()
+
+    def add(raw) -> None:
+        if not isinstance(raw, str):
+            return
+        full = normalize_url(base_url, raw.strip())
+        if full and not looks_like_direct_file(full) and full not in seen:
+            seen.add(full)
+            found.append(full)
+
+    def walk(value) -> None:
+        if isinstance(value, dict):
+            for key, nested in value.items():
+                normalized_key = str(key).strip().lower().replace("-", "_")
+                if normalized_key in JSON_NEXT_KEYS:
+                    if isinstance(nested, (list, tuple)):
+                        for item in nested:
+                            add(item)
+                    else:
+                        add(nested)
+                if isinstance(nested, (dict, list, tuple)):
+                    walk(nested)
+        elif isinstance(value, (list, tuple)):
+            for nested in value:
+                walk(nested)
+
+    walk(data)
+    return found
 
 
 def anchor_is_document_section(anchor, full_url: str) -> bool:
@@ -550,6 +620,47 @@ def discover_links(
             continue
 
         content_type = resp.headers.get("content-type", "").lower()
+
+        if options.mode == "api-json" or "json" in content_type:
+            try:
+                payload = resp.json()
+            except ValueError:
+                if options.mode == "api-json":
+                    msg = f"A resposta de {url} não contém JSON válido."
+                    result.warnings.append(msg)
+                    log(f"[AVISO] {msg}")
+                    continue
+            else:
+                new_count = 0
+                for full in extract_file_links_from_json(payload, resp.url):
+                    if options.same_domain_only and not any(same_site(seed, full) for seed in start_urls):
+                        continue
+                    if full not in download_seen:
+                        download_seen.add(full)
+                        downloads.append(full)
+                        new_count += 1
+
+                detected.add("api-json")
+                log(f"  -> {new_count} novo(s) arquivo(s) candidato(s) via JSON; total: {len(downloads)}")
+
+                for next_url in extract_json_next_urls(payload, resp.url):
+                    if next_url in queued or next_url in visited:
+                        continue
+                    if options.same_domain_only and not any(same_site(seed, next_url) for seed in start_urls):
+                        continue
+                    queued.add(next_url)
+                    queue.append((next_url, depth, True))
+
+                if options.delay > 0:
+                    if cancel_event:
+                        if cancel_event.wait(options.delay):
+                            result.cancelled = True
+                            result.warnings.append("Coleta cancelada pelo usuário.")
+                            break
+                    else:
+                        time.sleep(options.delay)
+                continue
+
         if "html" not in content_type and looks_like_direct_file(resp.url):
             if resp.url not in download_seen:
                 downloads.append(resp.url)
