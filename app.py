@@ -37,7 +37,7 @@ from core import (
 
 
 APP_NAME = "Grabber"
-APP_VERSION = "0.3.4-dev"
+APP_VERSION = "0.3.5-dev"
 
 THEMES = {
     "dark": {
@@ -166,6 +166,7 @@ class App(tk.Tk):
         self.same_domain_var = tk.BooleanVar(value=True)
         self.robots_var = tk.BooleanVar(value=True)
         self.probe_var = tk.BooleanVar(value=False)
+        self.main_content_var = tk.BooleanVar(value=True)
         self.selector_var = tk.StringVar()
         self.regex_var = tk.StringVar()
         self.workers_var = tk.IntVar(value=4)
@@ -258,6 +259,7 @@ class App(tk.Tk):
             "same_domain": bool(self.same_domain_var.get()),
             "robots": bool(self.robots_var.get()),
             "probe": bool(self.probe_var.get()),
+            "main_content": bool(self.main_content_var.get()),
             "selector": self.selector_var.get(),
             "regex": self.regex_var.get(),
             "workers": int(self.workers_var.get()),
@@ -290,6 +292,7 @@ class App(tk.Tk):
             self.same_domain_var.set(bool(data.get("same_domain", True)))
             self.robots_var.set(bool(data.get("robots", True)))
             self.probe_var.set(bool(data.get("probe", False)))
+            self.main_content_var.set(bool(data.get("main_content", True)))
             self.selector_var.set(data.get("selector", ""))
             self.regex_var.set(data.get("regex", ""))
             self.workers_var.set(int(data.get("workers", 4)))
@@ -443,26 +446,34 @@ class App(tk.Tk):
             "Use quando a coleta normal não reconhece botões de download. Gera requisições extras."
         ).grid(row=3, column=4, columnspan=2, sticky="w", pady=(10, 0))
 
+        self._help_check(
+            strategy, "Priorizar conteúdo principal", self.main_content_var,
+            "Foco no conteúdo principal",
+            "No modo Automático, o Grabber tenta analisar primeiro a região central da página "
+            "(por exemplo <main>, <article> ou áreas de conteúdo comuns), ignorando links globais de menus e rodapés.\n\n"
+            "Isso reduz arquivos irrelevantes em portais grandes. Desative se os arquivos esperados estiverem fora da área principal."
+        ).grid(row=4, column=0, columnspan=2, sticky="w", pady=(10, 0))
+
         self._field_label(
             strategy, "Pausa entre páginas (s)", "Pausa entre páginas",
             "Intervalo, em segundos, entre a leitura de páginas durante a descoberta.\n\n"
             "Uma pausa reduz a carga no servidor. O padrão é conservador; aumente-o em sites pequenos ou quando houver respostas HTTP 429."
-        ).grid(row=4, column=0, sticky="w", pady=(10, 0))
-        ttk.Spinbox(strategy, from_=0, to=10, increment=0.1, textvariable=self.delay_var, width=8).grid(row=4, column=1, sticky="w", padx=(8, 16), pady=(10, 0))
+        ).grid(row=5, column=0, sticky="w", pady=(10, 0))
+        ttk.Spinbox(strategy, from_=0, to=10, increment=0.1, textvariable=self.delay_var, width=8).grid(row=5, column=1, sticky="w", padx=(8, 16), pady=(10, 0))
         self._field_label(
             strategy, "Seletor CSS", "Seletor CSS",
             "Campo avançado. Use um seletor CSS para limitar a análise a uma região da página.\n\n"
             "Exemplos: #downloads, .documentos, main article\n\n"
             "Normalmente deixe em branco. É mais útil no modo Avançado quando a página possui muitos links não relacionados."
-        ).grid(row=4, column=2, sticky="w", pady=(10, 0))
-        ttk.Entry(strategy, textvariable=self.selector_var, style="Modern.TEntry").grid(row=4, column=3, sticky="ew", padx=(8, 16), pady=(10, 0))
+        ).grid(row=5, column=2, sticky="w", pady=(10, 0))
+        ttk.Entry(strategy, textvariable=self.selector_var, style="Modern.TEntry").grid(row=5, column=3, sticky="ew", padx=(8, 16), pady=(10, 0))
         self._field_label(
             strategy, "Regex do href", "Regex do href",
             "Campo avançado. Expressão regular usada para filtrar as URLs encontradas.\n\n"
             "Exemplo para PDFs: \\.pdf(?:\\?.*)?$\n\n"
             "Deixe em branco se não souber qual padrão usar. Uma regex incorreta pode ocultar arquivos válidos."
-        ).grid(row=4, column=4, sticky="w", pady=(10, 0))
-        ttk.Entry(strategy, textvariable=self.regex_var, style="Modern.TEntry").grid(row=4, column=5, sticky="ew", padx=(8, 0), pady=(10, 0))
+        ).grid(row=5, column=4, sticky="w", pady=(10, 0))
+        ttk.Entry(strategy, textvariable=self.regex_var, style="Modern.TEntry").grid(row=5, column=5, sticky="ew", padx=(8, 0), pady=(10, 0))
         strategy.columnconfigure(3, weight=1)
         strategy.columnconfigure(5, weight=1)
 
@@ -470,7 +481,7 @@ class App(tk.Tk):
             strategy,
             text="A sondagem é opcional porque cria requisições extras. Ela é útil quando o botão diz 'Baixar', mas a URL não possui extensão nem parâmetro reconhecido.",
             style="CardMuted.TLabel", wraplength=980,
-        ).grid(row=5, column=0, columnspan=6, sticky="w", pady=(8, 0))
+        ).grid(row=6, column=0, columnspan=6, sticky="w", pady=(8, 0))
 
         output = self._card(root)
         output.pack(fill="x", pady=(0, 12))
@@ -797,6 +808,7 @@ class App(tk.Tk):
                 href_regex=self.regex_var.get().strip(),
                 probe_ambiguous=bool(self.probe_var.get()),
                 probe_timeout=min(max(2, int(self.timeout_var.get())), 30),
+                prefer_main_content=bool(self.main_content_var.get()),
                 plugin_dir=str(plugin_directory()),
             )
         else:
@@ -1030,6 +1042,7 @@ class App(tk.Tk):
         self.same_domain_var.set(True)
         self.robots_var.set(True)
         self.probe_var.set(False)
+        self.main_content_var.set(True)
         self.selector_var.set("")
         self.regex_var.set("")
         self.workers_var.set(4)
