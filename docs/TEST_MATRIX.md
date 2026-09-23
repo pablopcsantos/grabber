@@ -14,6 +14,8 @@ A suíte atual usa um servidor HTTP temporário iniciado durante os testes.
 | CSS + regex | Restrição a contêiner e padrão de URL | ✅ |
 | HEAD/Content-Type | Link sem extensão identificado como PDF por sondagem | ✅ |
 | Plugin externo | Adaptador Python carregado da pasta de plugins | ✅ |
+| URL embutida em visualizador | Extrai o arquivo real de parâmetros como `file=` | ✅ |
+| robots.txt | Bloqueio é respeitado e registrado no resultado | ✅ |
 | Cancelamento de descoberta | `Event` interrompe coleta antes de visitar páginas | ✅ |
 | Download + relatório | Download paralelo, callback de progresso e CSV | ✅ |
 | Cancelamento de downloads | Itens são registrados como `CANCELADO` | ✅ |
