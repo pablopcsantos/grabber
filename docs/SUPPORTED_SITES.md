@@ -162,7 +162,7 @@ Antes da versão `0.3.2-dev`, a opção de mesmo domínio tratava essas duas for
 
 A partir de `0.3.2-dev`, o Grabber considera o domínio raiz e sua variante `www.` equivalentes para a restrição de mesmo site.
 
-**Estado:** correção implementada; ainda requer novo teste manual do Grabber para ser contabilizado como cenário real concluído.
+**Estado:** novo teste manual bem-sucedido na descoberta de arquivos após a correção. A completude da lista e o download dos itens devem continuar sendo observados em testes futuros.
 
 ### Edudata
 
@@ -182,7 +182,7 @@ e nela existe o link para o edital em PDF.
 
 A partir de `0.3.2-dev`, o modo Automático pode seguir, mesmo com profundidade `0`, um único nível de links que pareçam claramente seções documentais, como **Edital**, **Documentos**, **Arquivos**, **Resultados**, **Gabaritos** e **Cronograma**.
 
-**Estado:** correção genérica implementada; ainda requer novo teste manual para ser contabilizado como cenário real concluído.
+**Estado:** novo teste manual bem-sucedido na descoberta de arquivos após a correção genérica. A completude da lista e o download dos itens devem continuar sendo observados em testes futuros.
 
 ### Strix Educação
 
@@ -198,4 +198,4 @@ Isso sugere que o problema pode ser transitório ou específico da infraestrutur
 
 A partir de `0.3.2-dev`, a descoberta repete automaticamente falhas de conexão, timeout, HTTP 429 e erros HTTP 500/502/503/504 com pequeno intervalo progressivo.
 
-**Estado:** resiliência melhorada, mas a compatibilidade dessa URL continua pendente de novo teste. O projeto não tenta contornar WAF, CAPTCHA ou mecanismos antibot.
+**Estado:** no novo teste, as três tentativas do Grabber falharam por conexão. Uma verificação independente da URL específica também retornou HTTP 502, embora páginas de listagem do domínio continuassem acessíveis. A compatibilidade desse evento permanece pendente; o projeto não tenta contornar WAF, CAPTCHA ou mecanismos antibot.
