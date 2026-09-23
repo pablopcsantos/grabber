@@ -13,11 +13,14 @@ from core import (
     discover_links,
     download_all,
     make_session,
+    same_site,
     write_report,
 )
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
+    flaky_count = 0
+
     def log_message(self, format, *args):
         pass
 
@@ -31,6 +34,16 @@ class QuietHandler(SimpleHTTPRequestHandler):
         super().do_HEAD()
 
     def do_GET(self):
+        if urlparse(self.path).path == "/flaky.html":
+            type(self).flaky_count += 1
+            if type(self).flaky_count <= 2:
+                body = b"temporarily unavailable"
+                self.send_response(503)
+                self.send_header("Content-Type", "text/plain")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
         if urlparse(self.path).path == "/robots.txt":
             body = b"User-agent: *\nDisallow: /blocked.html\n"
             self.send_response(200)
@@ -77,6 +90,9 @@ class CoreIntegrationTests(unittest.TestCase):
             encoding="utf-8",
         )
         (root / "blocked.html").write_text('<a href="files/a.pdf">PDF bloqueado pelo robots</a>', encoding="utf-8")
+        (root / "hub.html").write_text('<a href="edit.html">Edital</a>', encoding="utf-8")
+        (root / "edit.html").write_text('<a href="files/a.pdf">Baixar edital</a>', encoding="utf-8")
+        (root / "flaky.html").write_text('<a href="files/a.pdf">PDF</a>', encoding="utf-8")
         (root / "plugins" / "special.py").write_text(
             'ADAPTER_NAME = "SpecialTest"\n\n'
             'def match_link(anchor, url, page_url):\n'
@@ -100,6 +116,26 @@ class CoreIntegrationTests(unittest.TestCase):
     def url(self, path: str) -> str:
         return f"http://127.0.0.1:{self.port}/{path}"
 
+    def test_same_site_treats_www_as_same_host(self):
+        self.assertTrue(
+            same_site(
+                "https://iades.com.br/inscricao/processo",
+                "https://www.iades.com.br/inscricao/upload/arquivo.pdf",
+            )
+        )
+        self.assertTrue(
+            same_site(
+                "https://www.exemplo.org/a",
+                "https://exemplo.org/b",
+            )
+        )
+        self.assertFalse(
+            same_site(
+                "https://exemplo.org/a",
+                "https://arquivos.exemplo.org/b",
+            )
+        )
+
     def test_generic_links_and_pagination(self):
         result = discover_links(
             self.session,
@@ -109,6 +145,32 @@ class CoreIntegrationTests(unittest.TestCase):
         self.assertTrue(any(x.endswith("/files/a.pdf") for x in result.download_links))
         self.assertTrue(any(x.endswith("/files/b.zip") for x in result.download_links))
         self.assertEqual(len(result.visited_pages), 2)
+
+    def test_auto_follows_likely_document_section_at_depth_zero(self):
+        result = discover_links(
+            self.session,
+            [self.url("hub.html")],
+            DiscoveryOptions(mode="auto", respect_robots=False, delay=0, crawl_depth=0, max_pages=10),
+        )
+        self.assertTrue(any(x.endswith("/files/a.pdf") for x in result.download_links))
+        self.assertTrue(any(x.endswith("/edit.html") for x in result.visited_pages))
+        self.assertIn("smart-section", result.detected_mode)
+
+    def test_page_fetch_retries_transient_503(self):
+        QuietHandler.flaky_count = 0
+        result = discover_links(
+            self.session,
+            [self.url("flaky.html")],
+            DiscoveryOptions(
+                mode="generic",
+                respect_robots=False,
+                delay=0,
+                page_retries=2,
+                page_timeout=5,
+            ),
+        )
+        self.assertEqual(QuietHandler.flaky_count, 3)
+        self.assertTrue(any(x.endswith("/files/a.pdf") for x in result.download_links))
 
     def test_internal_crawl_depth(self):
         result = discover_links(
