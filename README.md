@@ -521,10 +521,3 @@ python -m unittest discover -s tests -v
 ```
 
 O workflow `tests.yml` executa a suíte em Windows e Linux com Python 3.11 e 3.12. A separação entre testes locais e validação manual real está registrada em [`docs/TEST_MATRIX.md`](docs/TEST_MATRIX.md).
-
-
----
-
-## Nome do projeto
-
-**Grabber** é o nome definitivo adotado para o projeto.
