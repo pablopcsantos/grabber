@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.2-dev
+
+- domínio raiz e variante `www.` passam a ser tratados como o mesmo site na restrição de domínio;
+- modo Automático ganha navegação conservadora de um nível para seções documentais como Edital, Documentos, Arquivos, Resultados, Gabaritos e Cronograma;
+- descoberta passa a repetir falhas transitórias de conexão, timeout, HTTP 429 e HTTP 500/502/503/504;
+- mensagens de falha agora informam quantas tentativas foram realizadas;
+- novos testes de regressão para equivalência `www`, navegação documental automática e retentativa após HTTP 503;
+- documentação dos testes reais/diagnósticos em IADES, Edudata e Strix Educação.
+
 ## 0.3.1-dev
 
 - mensagem específica na GUI quando uma coleta é bloqueada por `robots.txt`;
