@@ -83,6 +83,28 @@ Procura arquivos em âncoras HTML convencionais, como:
 
 Preserva a compatibilidade com o caso de uso que originou o projeto, reconhecendo links com `?download=...` e paginação comum do Joomla.
 
+### API JSON
+
+Lê endpoints que retornam JSON e procura recursivamente URLs de arquivos dentro de objetos e listas.
+
+Exemplo conceitual:
+
+```json
+{
+  "results": [
+    {"file": "/documentos/edital.pdf"},
+    {"download": "https://exemplo.org/planilhas/dados.xlsx"}
+  ],
+  "next": "/api/documentos?page=2"
+}
+```
+
+O Grabber reconhece links diretos por extensão ou parâmetros de download e também trata paginação simples por campos comuns como `next`, `next_url` e `next_page`.
+
+No modo **Automático**, uma resposta cujo `Content-Type` indique JSON também é analisada dessa forma. Para uma URL que você já sabe ser uma API, escolha explicitamente **API JSON**.
+
+> Este suporte é genérico e não substitui integrações específicas quando a API exige autenticação, cabeçalhos proprietários, tokens ou uma estrutura de paginação incomum.
+
 ### Avançado: seletor CSS / regex
 
 Permite adaptar sites HTML estáticos sem alterar o código.
@@ -168,7 +190,6 @@ Pode não funcionar adequadamente em:
 - sites com login obrigatório;
 - SSO, CSRF, sessões ou cookies especiais;
 - URLs assinadas e temporárias;
-- APIs JSON ainda sem adaptador;
 - sites protegidos por CAPTCHA;
 - WAFs ou mecanismos antibot que bloqueiem requisições automatizadas.
 
@@ -413,24 +434,11 @@ Plugins externos no modo automático:
 python cli.py --url "URL" --plugins-dir ./plugins --dry-run
 ```
 
----
+Endpoint de API JSON:
 
-## Identidade visual e ícone
-
-O projeto utiliza um ícone próprio. Os arquivos ficam versionados em `assets/`:
-
-```text
-assets/
-├── grabber.ico
-├── grabber.svg
-└── grabber.png
+```bash
+python cli.py --url "https://exemplo.org/api/documentos" --mode api-json --dry-run
 ```
-
-- `grabber.ico`: usado no executável Windows e na janela do programa;
-- `grabber.svg`: arquivo-fonte vetorial preservado no repositório para organização documental e futuras edições;
-- `grabber.png`: fallback gráfico de 256×256 px para ambientes em que o `.ico` não seja suportado diretamente pela GUI.
-
-O `.ico` fornecido contém as resoluções 16, 24, 32, 48, 64, 128 e 256 px.
 
 ---
 
@@ -552,7 +560,7 @@ Recursos como Playwright, APIs JSON, autenticação e URLs assinadas permanecem 
 
 ## Testes automatizados
 
-O núcleo possui testes de integração locais, sem depender de websites externos. Eles cobrem atualmente **14 cenários**:
+O núcleo possui testes de integração locais, sem depender de websites externos. Eles cobrem atualmente **15 cenários**:
 
 - links diretos + paginação;
 - equivalência entre domínio raiz e variante `www.`;
@@ -560,6 +568,7 @@ O núcleo possui testes de integração locais, sem depender de websites externo
 - repetição de abertura após falhas HTTP transitórias;
 - rastreamento interno por profundidade;
 - adaptador PhocaDownload;
+- descoberta recursiva e paginação simples em API JSON;
 - seletor CSS + regex;
 - sondagem `HEAD`/`Content-Type` de link ambíguo;
 - plugin externo carregável;
