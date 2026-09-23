@@ -34,6 +34,13 @@ NEXT_PAGE_HINTS = (
     "next", "próximo", "proximo", "seguinte", "avançar", "avancar", "mais", "»", "›",
 )
 
+DOCUMENT_SECTION_HINTS = (
+    "edital", "editais", "documento", "documentos", "arquivo", "arquivos",
+    "download", "downloads", "comunicado", "comunicados", "resultado", "resultados",
+    "prova", "provas", "gabarito", "gabaritos", "cronograma",
+    "publicação", "publicações", "publicacao", "publicacoes",
+)
+
 DOWNLOAD_TEXT_HINTS = (
     "download", "baixar", "arquivo", "documento", "anexo", "exportar", "salvar",
 )
@@ -111,6 +118,9 @@ class DiscoveryOptions:
     probe_ambiguous: bool = False
     probe_timeout: int = 8
     plugin_dir: str = ""
+    smart_section_navigation: bool = True
+    page_retries: int = 2
+    page_timeout: int = 30
 
 
 @dataclass
@@ -191,12 +201,27 @@ def dedupe_preserve_order(items: Iterable[str]) -> list[str]:
     return out
 
 
+def canonical_host(url: str) -> str:
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower().rstrip(".")
+    if host.startswith("www."):
+        host = host[4:]
+    port = parsed.port
+    if port and not (
+        (parsed.scheme == "http" and port == 80)
+        or (parsed.scheme == "https" and port == 443)
+    ):
+        return f"{host}:{port}"
+    return host
+
+
 def same_site(a: str, b: str) -> bool:
     pa, pb = urlparse(a), urlparse(b)
     return (
         pa.scheme in {"http", "https"}
         and pb.scheme in {"http", "https"}
-        and pa.netloc.lower() == pb.netloc.lower()
+        and bool(canonical_host(a))
+        and canonical_host(a) == canonical_host(b)
     )
 
 
@@ -251,6 +276,20 @@ def anchor_is_download_candidate(anchor, full_url: str, options: DiscoveryOption
     if options.allow_query_downloads and has_download_query(full_url):
         return True
     return False
+
+
+def anchor_is_document_section(anchor, full_url: str) -> bool:
+    text = " ".join(
+        [
+            anchor.get_text(" ", strip=True) or "",
+            anchor.get("title") or "",
+            anchor.get("aria-label") or "",
+        ]
+    ).lower()
+    parsed = urlparse(full_url)
+    location = unquote(f"{parsed.path}?{parsed.query}").lower()
+    combined = f"{text} {location}"
+    return any(hint in combined for hint in DOCUMENT_SECTION_HINTS)
 
 
 def find_next_page_url(soup: BeautifulSoup, base_url: str) -> str | None:
@@ -355,6 +394,53 @@ def probe_link_is_file(
         return False, f"{head_error}; GET: {friendly_request_error(exc)}"
 
 
+def get_page_with_retries(
+    session: requests.Session,
+    url: str,
+    *,
+    timeout: int = 30,
+    retries: int = 2,
+    log: LogFn = noop_log,
+    cancel_event: threading.Event | None = None,
+) -> requests.Response:
+    """Abre uma página e repete apenas falhas provavelmente transitórias."""
+    retries = max(0, retries)
+    last_exc: requests.RequestException | None = None
+
+    for attempt in range(retries + 1):
+        try:
+            resp = session.get(url, timeout=timeout)
+            if resp.status_code in {429, 500, 502, 503, 504} and attempt < retries:
+                resp.close()
+                raise requests.HTTPError(
+                    f"HTTP {resp.status_code}",
+                    response=resp,
+                )
+            resp.raise_for_status()
+            return resp
+        except requests.RequestException as exc:
+            last_exc = exc
+            transient = isinstance(exc, (requests.Timeout, requests.ConnectionError))
+            if isinstance(exc, requests.HTTPError) and exc.response is not None:
+                transient = exc.response.status_code in {429, 500, 502, 503, 504}
+
+            if not transient or attempt >= retries:
+                raise
+
+            wait = min(4.0, 0.8 * (2 ** attempt)) + random.uniform(0.0, 0.2)
+            log(
+                f"  [NOVA TENTATIVA {attempt + 1}/{retries}] "
+                f"{friendly_request_error(exc)}; aguardando {wait:.1f}s"
+            )
+            if cancel_event and cancel_event.wait(wait):
+                raise CancelledError()
+            if not cancel_event:
+                time.sleep(wait)
+
+    assert last_exc is not None
+    raise last_exc
+
+
 def friendly_request_error(exc: Exception) -> str:
     if isinstance(exc, requests.Timeout):
         return "tempo limite excedido"
@@ -441,10 +527,24 @@ def discover_links(
 
         log(f"Lendo página {len(visited)}/{options.max_pages}: {url}")
         try:
-            resp = session.get(url, timeout=30)
-            resp.raise_for_status()
+            resp = get_page_with_retries(
+                session,
+                url,
+                timeout=max(5, options.page_timeout),
+                retries=max(0, options.page_retries),
+                log=log,
+                cancel_event=cancel_event,
+            )
+        except CancelledError:
+            result.cancelled = True
+            result.warnings.append("Coleta cancelada pelo usuário.")
+            break
         except requests.RequestException as exc:
-            msg = f"Falha ao abrir {url}: {friendly_request_error(exc)}"
+            msg = (
+                f"Falha ao abrir {url} após "
+                f"{max(0, options.page_retries) + 1} tentativa(s): "
+                f"{friendly_request_error(exc)}"
+            )
             result.warnings.append(msg)
             log(f"[AVISO] {msg}")
             continue
@@ -523,7 +623,19 @@ def discover_links(
                 new_count += 1
                 continue
 
-            if options.crawl_depth > depth and not looks_like_direct_file(full):
+            smart_section = (
+                options.mode == "auto"
+                and options.smart_section_navigation
+                and depth == 0
+                and anchor_is_document_section(anchor, full)
+                and not looks_like_direct_file(full)
+            )
+            if smart_section:
+                if full not in queued and full not in visited:
+                    queued.add(full)
+                    queue.append((full, depth + 1, False))
+                    detected.add("smart-section")
+            elif options.crawl_depth > depth and not looks_like_direct_file(full):
                 if full not in queued and full not in visited:
                     queued.add(full)
                     queue.append((full, depth + 1, False))
