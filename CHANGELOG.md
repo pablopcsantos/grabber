@@ -2,6 +2,7 @@
 
 ## 0.3.5-dev
 
+- subtítulo oficial **Grabber - Web Crawler & Bulk Downloader** adotado no README e na interface;
 - modo Automático passa a priorizar regiões semânticas principais da página, como `<main>`, `<article>` e contêineres de conteúdo conhecidos;
 - nova opção **Priorizar conteúdo principal** na GUI, habilitada por padrão;
 - nova opção CLI `--scan-whole-page` para desativar o filtro e voltar à varredura integral;
