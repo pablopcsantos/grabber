@@ -93,6 +93,14 @@ class CoreIntegrationTests(unittest.TestCase):
         (root / "hub.html").write_text('<a href="edit.html">Edital</a>', encoding="utf-8")
         (root / "edit.html").write_text('<a href="files/a.pdf">Baixar edital</a>', encoding="utf-8")
         (root / "flaky.html").write_text('<a href="files/a.pdf">PDF</a>', encoding="utf-8")
+        (root / "api1.json").write_text(
+            '{"results":[{"file":"files/a.pdf"},{"nested":{"download":"files/b.zip"}}],"next":"api2.json"}',
+            encoding="utf-8",
+        )
+        (root / "api2.json").write_text(
+            '{"items":[{"url":"files/c.docx"}]}',
+            encoding="utf-8",
+        )
         (root / "plugins" / "special.py").write_text(
             'ADAPTER_NAME = "SpecialTest"\n\n'
             'def match_link(anchor, url, page_url):\n'
@@ -179,6 +187,19 @@ class CoreIntegrationTests(unittest.TestCase):
             DiscoveryOptions(mode="generic", respect_robots=False, delay=0, crawl_depth=1, max_pages=10),
         )
         self.assertTrue(any(x.endswith("/files/c.docx") for x in result.download_links))
+
+    def test_json_api_recursive_links_and_pagination(self):
+        result = discover_links(
+            self.session,
+            [self.url("api1.json")],
+            DiscoveryOptions(mode="api-json", respect_robots=False, delay=0, max_pages=10),
+        )
+        self.assertEqual(len(result.download_links), 3)
+        self.assertTrue(any(x.endswith("/files/a.pdf") for x in result.download_links))
+        self.assertTrue(any(x.endswith("/files/b.zip") for x in result.download_links))
+        self.assertTrue(any(x.endswith("/files/c.docx") for x in result.download_links))
+        self.assertEqual(len(result.visited_pages), 2)
+        self.assertIn("api-json", result.detected_mode)
 
     def test_phocadownload_adapter(self):
         result = discover_links(
