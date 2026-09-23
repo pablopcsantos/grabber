@@ -11,6 +11,7 @@ A suíte atual usa um servidor HTTP temporário iniciado durante os testes.
 | Links diretos + paginação `rel=next` | Descoberta de PDF/ZIP em duas páginas | ✅ |
 | Crawl interno | Arquivo encontrado em página interna com profundidade 1 | ✅ |
 | PhocaDownload | URL com `download=` | ✅ |
+| API JSON | URLs aninhadas + paginação simples entre dois endpoints JSON | ✅ |
 | CSS + regex | Restrição a contêiner e padrão de URL | ✅ |
 | HEAD/Content-Type | Link sem extensão identificado como PDF por sondagem | ✅ |
 | Plugin externo | Adaptador Python carregado da pasta de plugins | ✅ |
@@ -41,6 +42,7 @@ Antes da versão 1.0, registrar pelo menos seis cenários em websites públicos 
 | Crawl depth 1/2 | Pendente | ⬜ | |
 | Seletor CSS personalizado | Pendente | ⬜ | |
 | Regex personalizada | Pendente | ⬜ | |
+| API JSON pública | Pendente | ⬜ | Validar um endpoint público permitido com arquivos e, se possível, paginação |
 | Lista manual de URLs | Localmente coberto | ✅ | Não depende do scraper |
 
 ## Portabilidade
