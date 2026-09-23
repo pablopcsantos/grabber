@@ -182,7 +182,7 @@ Antes da versão `0.3.2-dev`, a opção de mesmo domínio tratava essas duas for
 
 A partir de `0.3.2-dev`, o Grabber considera o domínio raiz e sua variante `www.` equivalentes para a restrição de mesmo site.
 
-**Estado:** novo teste manual bem-sucedido na descoberta de arquivos após a correção. A completude da lista e o download dos itens devem continuar sendo observados em testes futuros.
+**Estado:** descoberta manual completa no teste mais recente: 4 arquivos encontrados, correspondendo aos 4 links de arquivo existentes na página testada.
 
 ### Edudata
 
@@ -202,7 +202,7 @@ e nela existe o link para o edital em PDF.
 
 A partir de `0.3.2-dev`, o modo Automático pode seguir, mesmo com profundidade `0`, um único nível de links que pareçam claramente seções documentais, como **Edital**, **Documentos**, **Arquivos**, **Resultados**, **Gabaritos** e **Cronograma**.
 
-**Estado:** novo teste manual bem-sucedido na descoberta de arquivos após a correção genérica. A completude da lista e o download dos itens devem continuar sendo observados em testes futuros.
+**Estado:** descoberta manual completa no teste mais recente: 1 arquivo encontrado, correspondendo ao único link de arquivo existente na página testada.
 
 ### Strix Educação
 
