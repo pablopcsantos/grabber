@@ -23,6 +23,7 @@ A suíte atual usa um servidor HTTP temporário iniciado durante os testes.
 | Domínio raiz + `www` | A restrição de mesmo site aceita as duas variantes do mesmo host | ✅ |
 | Navegação documental inteligente | Modo Automático segue uma seção “Edital” mesmo com profundidade 0 | ✅ |
 | Retentativa de página | Servidor retorna 503 duas vezes e a terceira tentativa é processada | ✅ |
+| Foco no conteúdo principal | Ignora links de header/footer quando existe região principal e permite desativar o filtro | ✅ |
 
 Execute:
 
@@ -37,7 +38,7 @@ Antes da versão 1.0, registrar pelo menos seis cenários em websites públicos 
 | Classe | Website testado | Resultado | Observações |
 |---|---|---|---|
 | Joomla/PhocaDownload | Pendente | ⬜ | |
-| HTML com links diretos | Pendente | ⬜ | |
+| HTML com links diretos | IADES | ✅ | 4 de 4 links de arquivos identificados no teste manual |
 | Paginação tradicional | Pendente | ⬜ | |
 | Crawl depth 1/2 | Pendente | ⬜ | |
 | Seletor CSS personalizado | Pendente | ⬜ | |
@@ -64,6 +65,11 @@ Também permanecem pendentes testes do executável produzido pelo PyInstaller:
 | 23/09/2026 | Fundação Carlos Chagas (FCC) — HTML com links de documentos e visualizador intermediário | Parcial | Com `robots.txt` habilitado, a página `concursos/alems125/index.html` foi corretamente ignorada porque a política do site não permitiu a coleta. A estrutura pública da página utiliza, em alguns documentos, um visualizador com a URL real do PDF no parâmetro `file=`. O suporte a esse padrão foi adicionado em `0.3.1-dev`. Não contabilizado ainda como teste real concluído de download. |
 
 
-| 23/09/2026 | Instituto Americano de Desenvolvimento (IADES) — links diretos em domínio raiz/`www` | ✅ Descoberta bem-sucedida | Após a correção de equivalência raiz/`www`, o teste manual encontrou arquivos. A completude da lista e os downloads ainda devem continuar sendo observados em testes futuros. |
-| 23/09/2026 | Edudata — portal com seção documental interna | ✅ Descoberta bem-sucedida | Após a navegação documental automática introduzida em `0.3.2-dev`, o novo teste encontrou arquivos a partir do portal. A completude da lista e os downloads ainda devem continuar sendo observados. |
+| 23/09/2026 | Instituto Americano de Desenvolvimento (IADES) — links diretos em domínio raiz/`www` | ✅ Descoberta completa | O Grabber identificou 4 arquivos, correspondendo aos 4 links de arquivos existentes na página testada. |
+| 23/09/2026 | Edudata — portal com seção documental interna | ✅ Descoberta completa | O Grabber identificou 1 arquivo, correspondendo ao único link de arquivo existente na página testada. |
 | 23/09/2026 | Strix Educação — página de evento | ❌ Ainda indisponível | O novo teste realizou três tentativas e todas falharam por conexão. Uma verificação independente da mesma URL também retornou HTTP 502, enquanto páginas de listagem do domínio permaneciam acessíveis. O caso continua pendente e não é tratado como falha de reconhecimento de links. |
+
+
+| 23/09/2026 | FCM/Unicamp — página de processo seletivo com PDFs diretos | ⚠️ Parcial | Foram encontrados vários PDFs relevantes, mas também apareceram documentos aparentemente alheios ao processo seletivo. O caso motivou o filtro opcional de conteúdo principal introduzido em `0.3.5-dev`; reteste pendente. |
+| 23/09/2026 | Vunesp — página de concurso | ❌ HTTP 403 | O servidor respondeu com acesso negado antes que o Grabber pudesse analisar o HTML. O projeto não tenta contornar controles de acesso/antibot; compatibilidade permanece pendente. |
+| 23/09/2026 | UnirG — Residência Médica | ⚠️ Over-crawling | O Grabber encontrou os documentos esperados da Residência Médica, mas também muitos arquivos institucionais e de outras áreas do portal. A inspeção da página mostrou conteúdo relevante misturado a navegação global; foi adicionado foco opcional na região principal da página em `0.3.5-dev`. Reteste pendente. |
