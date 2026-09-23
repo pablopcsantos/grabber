@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-# Grabber
+# Grabber - Web Crawler & Bulk Downloader
 # Aplicação desktop portátil desenvolvida de forma independente por
 # Pablo Phillipe Cândido dos Santos para descobrir, revisar e baixar arquivos
 # públicos em massa a partir de websites e APIs JSON.
@@ -37,6 +37,7 @@ from core import (
 
 
 APP_NAME = "Grabber"
+APP_TAGLINE = "Web Crawler & Bulk Downloader"
 APP_VERSION = "0.3.5-dev"
 
 THEMES = {
@@ -134,7 +135,7 @@ def open_path(path: Path) -> None:
 class App(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
-        self.title(f"{APP_NAME} {APP_VERSION}")
+        self.title(f"{APP_NAME} - {APP_TAGLINE} {APP_VERSION}")
         self.geometry("1180x860")
         self.minsize(920, 700)
         apply_app_icon(self)
@@ -339,7 +340,7 @@ class App(tk.Tk):
         ttk.Label(title_row, text=f"v{APP_VERSION}", style="Badge.TLabel").pack(side="left", padx=(12, 0))
         ttk.Label(
             top,
-            text="Descoberta, revisão e download em massa de arquivos públicos em websites",
+            text=APP_TAGLINE,
             style="Muted.TLabel",
         ).pack(anchor="w", pady=(4, 0))
 
@@ -1053,7 +1054,8 @@ class App(tk.Tk):
     def _show_about(self) -> None:
         messagebox.showinfo(
             "Sobre",
-            f"{APP_NAME} {APP_VERSION}\n\n"
+            f"{APP_NAME} - {APP_TAGLINE}\n"
+            f"Versão {APP_VERSION}\n\n"
             "Crawler e downloader portátil para descobrir, revisar e baixar arquivos públicos em massa a partir de diferentes tipos de websites e listas de URLs.\n\n"
             "O modo Automático pode ser ampliado por adaptadores Python confiáveis colocados na pasta plugins/.\n\n"
             "O projeto não tem como objetivo contornar autenticação, CAPTCHA ou mecanismos antibot.",
