@@ -104,7 +104,7 @@ Critérios:
 Antes da primeira versão estável, o projeto deve ser testado em websites públicos reais representativos de:
 
 - [ ] Joomla/PhocaDownload;
-- [ ] página HTML com links diretos para PDF/DOC/ZIP;
+- [ ] página HTML com links diretos para PDF/DOC/ZIP — FCC analisada parcialmente; `robots.txt` bloqueou a coleta padrão, portanto ainda não conta como cenário concluído;
 - [ ] site com paginação tradicional;
 - [ ] site em que arquivos aparecem em páginas internas (`crawl depth` 1 ou 2);
 - [ ] site que exige seletor CSS personalizado;
