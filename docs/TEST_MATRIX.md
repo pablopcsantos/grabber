@@ -48,3 +48,10 @@ Também permanecem pendentes testes do executável produzido pelo PyInstaller:
 | Windows 11 | ⬜ |
 | Máquina sem Python | ⬜ |
 | Execução a partir de pendrive | ⬜ |
+
+
+## Testes manuais em websites reais
+
+| Data | Website/classe | Resultado | Observações |
+|---|---|---|---|
+| 23/09/2026 | Fundação Carlos Chagas (FCC) — HTML com links de documentos e visualizador intermediário | Parcial | Com `robots.txt` habilitado, a página `concursos/alems125/index.html` foi corretamente ignorada porque a política do site não permitiu a coleta. A estrutura pública da página utiliza, em alguns documentos, um visualizador com a URL real do PDF no parâmetro `file=`. O suporte a esse padrão foi adicionado em `0.3.1-dev`. Não contabilizado ainda como teste real concluído de download. |
