@@ -31,6 +31,7 @@ Características atuais:
 
 - **modo escuro como padrão**;
 - pequenos botões **?** ao lado das configurações menos intuitivas, abrindo explicações contextuais sem sair da tela;
+- opção **Priorizar conteúdo principal** para reduzir arquivos irrelevantes provenientes de menus, rodapés e áreas globais do site;
 - modo claro selecionável em `Configurações → Aparência`;
 - preferência visual salva junto ao executável, para acompanhar o usuário em um pendrive;
 - seleção de página web ou arquivo TXT com URLs;
@@ -65,6 +66,7 @@ Modo recomendado para a maioria dos casos. Atualmente combina:
 
 O modo automático também trata algumas diferenças comuns entre sites reais:
 
+- prioriza, quando possível, a região semântica principal da página (`<main>`, `<article>` e contêineres de conteúdo conhecidos), reduzindo links globais de menus e rodapés; essa preferência pode ser desativada;
 - considera o domínio raiz e sua variante `www.` como o mesmo website para a restrição de domínio;
 - pode seguir automaticamente **um nível** de links que parecem levar a seções documentais, como “Edital”, “Documentos”, “Arquivos”, “Resultados”, “Gabaritos” ou “Cronograma”, mesmo quando a profundidade geral está em `0`;
 - repete automaticamente a abertura de páginas em falhas transitórias de conexão e em respostas HTTP como 429, 500, 502, 503 e 504.
@@ -274,6 +276,7 @@ Os campos mais técnicos da aba **Configuração** possuem um pequeno botão **?
 - restrição ao mesmo domínio;
 - `robots.txt`;
 - sondagem `HEAD`/`Content-Type`;
+- foco no conteúdo principal da página;
 - pausa entre páginas;
 - seletor CSS;
 - regex do `href`;
@@ -543,7 +546,7 @@ As funcionalidades planejadas para os Marcos 1, 2 e 3 já estão implementadas. 
 - execução a partir de pendrive;
 - correções que surgirem a partir desses testes.
 
-Recursos como Playwright, APIs JSON, autenticação e URLs assinadas permanecem planejados para versões posteriores e não bloqueiam a 1.0.
+Recursos como Playwright, autenticação genérica, URLs assinadas e integrações com APIs complexas permanecem planejados para versões posteriores e não bloqueiam a 1.0. O suporte genérico inicial a APIs JSON já está implementado.
 
 ---
 
@@ -585,3 +588,13 @@ python -m unittest discover -s tests -v
 ```
 
 O workflow `tests.yml` executa a suíte em Windows e Linux com Python 3.11 e 3.12. A separação entre testes locais e validação manual real está registrada em [`docs/TEST_MATRIX.md`](docs/TEST_MATRIX.md).
+
+---
+
+## 👤 Autoria e desenvolvimento
+
+O **Grabber** é uma aplicação desktop portátil de web crawling e download em massa de arquivos públicos, desenvolvida de forma independente por **Pablo Phillipe Cândido dos Santos**. O projeto é destinado à descoberta, revisão e transferência em lote de arquivos disponibilizados em websites e APIs JSON, com estratégias configuráveis de coleta, seleção prévia dos links e geração de relatórios de download.
+
+O desenvolvimento contou com a utilização de ferramentas de inteligência artificial generativa como recurso auxiliar no processo de desenvolvimento, mantendo-se sob responsabilidade do autor a concepção, implementação, integração e verificação do projeto.
+
+Currículo Lattes: [http://lattes.cnpq.br/9500873674712528](http://lattes.cnpq.br/9500873674712528)
