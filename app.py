@@ -37,7 +37,7 @@ from core import (
 
 
 APP_NAME = "Grabber"
-APP_VERSION = "0.3.2-dev"
+APP_VERSION = "0.3.3-dev"
 
 THEMES = {
     "dark": {
@@ -392,28 +392,74 @@ class App(tk.Tk):
             style="CardMuted.TLabel", wraplength=980,
         ).grid(row=1, column=0, sticky="w", columnspan=6, pady=(3, 12))
 
-        ttk.Label(strategy, text="Modo", style="Card.TLabel").grid(row=2, column=0, sticky="w")
+        self._field_label(
+            strategy, "Modo", "Modo de descoberta",
+            "Automático (recomendado): combina as regras nativas, navegação documental e plugins confiáveis.\n\n"
+            "HTML genérico: procura links diretos em páginas HTML convencionais.\n\n"
+            "Joomla / PhocaDownload: prioriza o padrão ?download= usado por esse componente.\n\n"
+            "Avançado: permite restringir a descoberta com seletor CSS e/ou regex."
+        ).grid(row=2, column=0, sticky="w")
         ttk.Combobox(strategy, textvariable=self.mode_var, values=tuple(MODE_LABEL_TO_KEY), state="readonly", width=32).grid(
             row=2, column=1, sticky="w", padx=(8, 16)
         )
-        ttk.Label(strategy, text="Profundidade", style="Card.TLabel").grid(row=2, column=2, sticky="w")
+        self._field_label(
+            strategy, "Profundidade", "Profundidade de rastreamento",
+            "Define quantos níveis de páginas internas o Grabber pode seguir.\n\n"
+            "0: permanece na página inicial, na paginação e, no modo Automático, pode abrir uma seção claramente documental como 'Edital' ou 'Resultados'.\n"
+            "1: também visita os demais links internos encontrados na primeira página.\n"
+            "2 ou mais: continua aprofundando o rastreamento.\n\n"
+            "Valores maiores aumentam o tempo e a quantidade de páginas acessadas."
+        ).grid(row=2, column=2, sticky="w")
         ttk.Spinbox(strategy, from_=0, to=5, textvariable=self.crawl_depth_var, width=6).grid(row=2, column=3, sticky="w", padx=(8, 16))
-        ttk.Label(strategy, text="Máx. páginas", style="Card.TLabel").grid(row=2, column=4, sticky="w")
+        self._field_label(
+            strategy, "Máx. páginas", "Limite de páginas",
+            "Número máximo de páginas HTML que a coleta poderá abrir nesta execução.\n\n"
+            "Serve como limite de segurança para impedir que um crawler entre em uma navegação muito extensa. "
+            "O padrão de 50 costuma ser suficiente para páginas de documentos e pequenos portais."
+        ).grid(row=2, column=4, sticky="w")
         ttk.Spinbox(strategy, from_=1, to=1000, textvariable=self.max_pages_var, width=8).grid(row=2, column=5, sticky="w", padx=(8, 0))
 
-        ttk.Checkbutton(strategy, text="Restringir ao mesmo domínio", variable=self.same_domain_var).grid(row=3, column=0, columnspan=2, sticky="w", pady=(10, 0))
-        ttk.Checkbutton(strategy, text="Respeitar robots.txt (recomendado)", variable=self.robots_var).grid(row=3, column=2, columnspan=2, sticky="w", pady=(10, 0))
-        ttk.Checkbutton(
-            strategy,
-            text="Sondar links ambíguos (HEAD/Content-Type)",
-            variable=self.probe_var,
+        self._help_check(
+            strategy, "Restringir ao mesmo domínio", self.same_domain_var,
+            "Restrição de domínio",
+            "Quando habilitado, o Grabber evita seguir páginas pertencentes a outros sites. "
+            "A variante com e sem 'www.' é tratada como o mesmo domínio.\n\n"
+            "É recomendável manter esta opção ligada para evitar que a coleta se espalhe para sites externos."
+        ).grid(row=3, column=0, columnspan=2, sticky="w", pady=(10, 0))
+        self._help_check(
+            strategy, "Respeitar robots.txt (recomendado)", self.robots_var,
+            "robots.txt",
+            "robots.txt é um arquivo publicado pelo próprio site que pode indicar quais áreas não devem ser acessadas por robôs/crawlers.\n\n"
+            "Com esta opção ligada, o Grabber deixa de coletar URLs proibidas por essa política. "
+            "Desative apenas quando você tiver autorização ou uma razão legítima para automatizar aquele conteúdo."
+        ).grid(row=3, column=2, columnspan=2, sticky="w", pady=(10, 0))
+        self._help_check(
+            strategy, "Sondar links ambíguos (HEAD/Content-Type)", self.probe_var,
+            "Sondagem de links ambíguos",
+            "Alguns botões de download não possuem .pdf, .zip ou outra extensão na URL.\n\n"
+            "Ao habilitar esta opção, o Grabber envia uma requisição HEAD (ou um GET de fallback) para verificar os cabeçalhos e descobrir se o endereço realmente entrega um arquivo.\n\n"
+            "Use quando a coleta normal não reconhece botões de download. Gera requisições extras."
         ).grid(row=3, column=4, columnspan=2, sticky="w", pady=(10, 0))
 
-        ttk.Label(strategy, text="Pausa entre páginas (s)", style="Card.TLabel").grid(row=4, column=0, sticky="w", pady=(10, 0))
+        self._field_label(
+            strategy, "Pausa entre páginas (s)", "Pausa entre páginas",
+            "Intervalo, em segundos, entre a leitura de páginas durante a descoberta.\n\n"
+            "Uma pausa reduz a carga no servidor. O padrão é conservador; aumente-o em sites pequenos ou quando houver respostas HTTP 429."
+        ).grid(row=4, column=0, sticky="w", pady=(10, 0))
         ttk.Spinbox(strategy, from_=0, to=10, increment=0.1, textvariable=self.delay_var, width=8).grid(row=4, column=1, sticky="w", padx=(8, 16), pady=(10, 0))
-        ttk.Label(strategy, text="Seletor CSS", style="Card.TLabel").grid(row=4, column=2, sticky="w", pady=(10, 0))
+        self._field_label(
+            strategy, "Seletor CSS", "Seletor CSS",
+            "Campo avançado. Use um seletor CSS para limitar a análise a uma região da página.\n\n"
+            "Exemplos: #downloads, .documentos, main article\n\n"
+            "Normalmente deixe em branco. É mais útil no modo Avançado quando a página possui muitos links não relacionados."
+        ).grid(row=4, column=2, sticky="w", pady=(10, 0))
         ttk.Entry(strategy, textvariable=self.selector_var, style="Modern.TEntry").grid(row=4, column=3, sticky="ew", padx=(8, 16), pady=(10, 0))
-        ttk.Label(strategy, text="Regex do href", style="Card.TLabel").grid(row=4, column=4, sticky="w", pady=(10, 0))
+        self._field_label(
+            strategy, "Regex do href", "Regex do href",
+            "Campo avançado. Expressão regular usada para filtrar as URLs encontradas.\n\n"
+            "Exemplo para PDFs: \\.pdf(?:\\?.*)?$\n\n"
+            "Deixe em branco se não souber qual padrão usar. Uma regex incorreta pode ocultar arquivos válidos."
+        ).grid(row=4, column=4, sticky="w", pady=(10, 0))
         ttk.Entry(strategy, textvariable=self.regex_var, style="Modern.TEntry").grid(row=4, column=5, sticky="ew", padx=(8, 0), pady=(10, 0))
         strategy.columnconfigure(3, weight=1)
         strategy.columnconfigure(5, weight=1)
@@ -431,11 +477,24 @@ class App(tk.Tk):
         ttk.Entry(output, textvariable=self.output_var, style="Modern.TEntry").grid(row=1, column=1, columnspan=4, sticky="ew", padx=(8, 8), pady=(10, 0))
         ttk.Button(output, text="Selecionar pasta", style="Modern.TButton", command=self._choose_output).grid(row=1, column=5, sticky="e", pady=(10, 0))
         output.columnconfigure(4, weight=1)
-        ttk.Label(output, text="Downloads simultâneos", style="Card.TLabel").grid(row=2, column=0, sticky="w", pady=(10, 0))
+        self._field_label(
+            output, "Downloads simultâneos", "Downloads simultâneos",
+            "Quantidade máxima de arquivos que podem ser baixados ao mesmo tempo.\n\n"
+            "Valores maiores podem acelerar a transferência, mas também aumentam a carga sobre o servidor e sua conexão. "
+            "O padrão de 4 é uma escolha moderada."
+        ).grid(row=2, column=0, sticky="w", pady=(10, 0))
         ttk.Spinbox(output, from_=1, to=24, textvariable=self.workers_var, width=7).grid(row=2, column=1, sticky="w", padx=(8, 18), pady=(10, 0))
-        ttk.Label(output, text="Tentativas", style="Card.TLabel").grid(row=2, column=2, sticky="w", pady=(10, 0))
+        self._field_label(
+            output, "Tentativas", "Tentativas de download",
+            "Número de tentativas usadas para baixar cada arquivo quando ocorre uma falha.\n\n"
+            "Aumentar esse valor pode ajudar em conexões instáveis, mas também torna falhas permanentes mais demoradas."
+        ).grid(row=2, column=2, sticky="w", pady=(10, 0))
         ttk.Spinbox(output, from_=1, to=10, textvariable=self.retries_var, width=7).grid(row=2, column=3, sticky="w", padx=(8, 18), pady=(10, 0))
-        ttk.Label(output, text="Timeout (s)", style="Card.TLabel").grid(row=2, column=4, sticky="w", pady=(10, 0))
+        self._field_label(
+            output, "Timeout (s)", "Tempo limite",
+            "Tempo máximo, em segundos, que uma operação de rede pode aguardar antes de ser considerada sem resposta.\n\n"
+            "Aumente em servidores lentos ou arquivos grandes; diminua apenas se quiser detectar falhas mais rapidamente."
+        ).grid(row=2, column=4, sticky="w", pady=(10, 0))
         ttk.Spinbox(output, from_=5, to=600, textvariable=self.timeout_var, width=8).grid(row=2, column=5, sticky="w", padx=(8, 0), pady=(10, 0))
 
         actions = ttk.Frame(root, style="Root.TFrame")
@@ -518,6 +577,33 @@ class App(tk.Tk):
         self.log.pack(fill="both", expand=True)
         self.log.configure(state="disabled")
 
+    def _show_field_help(self, title: str, message: str) -> None:
+        messagebox.showinfo(title, message, parent=self)
+
+    def _field_label(self, parent, text: str, help_title: str, help_text: str) -> ttk.Frame:
+        frame = ttk.Frame(parent, style="Card.TFrame")
+        ttk.Label(frame, text=text, style="Card.TLabel").pack(side="left")
+        ttk.Button(
+            frame,
+            text="?",
+            width=2,
+            style="Help.TButton",
+            command=lambda: self._show_field_help(help_title, help_text),
+        ).pack(side="left", padx=(5, 0))
+        return frame
+
+    def _help_check(self, parent, text: str, variable: tk.Variable, help_title: str, help_text: str) -> ttk.Frame:
+        frame = ttk.Frame(parent, style="Card.TFrame")
+        ttk.Checkbutton(frame, text=text, variable=variable).pack(side="left")
+        ttk.Button(
+            frame,
+            text="?",
+            width=2,
+            style="Help.TButton",
+            command=lambda: self._show_field_help(help_title, help_text),
+        ).pack(side="left", padx=(5, 0))
+        return frame
+
     def _card(self, parent) -> ttk.Frame:
         return ttk.Frame(parent, style="Card.TFrame", padding=16)
 
@@ -555,6 +641,8 @@ class App(tk.Tk):
         self.style.configure("TCheckbutton", background=c["surface"], foreground=c["text"])
         self.style.map("TCheckbutton", background=[("active", c["surface"])])
         self._button_style("Modern.TButton", c["surface2"], c["text"])
+        self._button_style("Help.TButton", c["surface2"], c["accent"])
+        self.style.configure("Help.TButton", padding=(4, 1), font=("Segoe UI", 8, "bold"))
         self._button_style("Primary.TButton", c["accent"], "#FFFFFF")
         self._button_style("Success.TButton", c["success"], "#FFFFFF")
         self._button_style("Danger.TButton", c["danger"], "#FFFFFF")
