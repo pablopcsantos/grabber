@@ -124,6 +124,8 @@ Os cenários abaixo possuem testes de integração locais e não dependem de web
 - [x] seletor CSS + regex;
 - [x] sondagem HEAD/Content-Type de URL ambígua;
 - [x] plugin externo carregável;
+- [x] URL de arquivo embutida em visualizador;
+- [x] bloqueio por `robots.txt` registrado no resultado;
 - [x] cancelamento de descoberta;
 - [x] download + relatório + progresso determinístico;
 - [x] cancelamento de downloads;
