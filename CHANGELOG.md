@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.5-dev
+
+- modo Automático passa a priorizar regiões semânticas principais da página, como `<main>`, `<article>` e contêineres de conteúdo conhecidos;
+- nova opção **Priorizar conteúdo principal** na GUI, habilitada por padrão;
+- nova opção CLI `--scan-whole-page` para desativar o filtro e voltar à varredura integral;
+- novo teste automatizado confirma que links globais de cabeçalho/rodapé são ignorados quando existe conteúdo principal e recuperados quando o filtro é desativado;
+- testes reais de IADES e Edudata registrados como descoberta completa (4/4 e 1/1 links, respectivamente);
+- novos resultados documentados para FCM/Unicamp, Vunesp e UnirG;
+- seção de autoria adicionada ao README e cabeçalho de autoria incluído somente em `app.py`.
+
 ## 0.3.4-dev
 
 - novo modo **API JSON** na GUI e na CLI;
