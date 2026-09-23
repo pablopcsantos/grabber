@@ -59,6 +59,7 @@ Modo recomendado para a maioria dos casos. Atualmente combina:
 - links diretos por extensão;
 - atributo HTML `download`;
 - parâmetros comuns como `download=`, `file=`, `arquivo=`, `attachment=` e semelhantes;
+- URLs de arquivos embutidas em visualizadores HTML, quando aparecem em parâmetros como `file=` ou `url=`;
 - adaptadores Python confiáveis presentes na pasta `plugins/`.
 
 O usuário também pode habilitar uma **sondagem opcional por `HEAD`/`Content-Type`** para botões de download cuja URL não possui extensão ou parâmetro reconhecido. A sondagem fica desativada por padrão porque gera requisições adicionais.
@@ -169,6 +170,8 @@ Por padrão:
 - a consulta a `robots.txt` fica habilitada;
 - existe uma pausa entre páginas;
 - são usados apenas quatro downloads simultâneos.
+
+Quando o `robots.txt` proíbe a coleta de determinada página, o Grabber **não a acessa** enquanto essa opção estiver ativa e apresenta uma mensagem específica explicando o motivo. O usuário pode desabilitar manualmente a opção **Respeitar robots.txt (recomendado)**, mas deve fazê-lo apenas quando tiver autorização ou uma razão legítima para automatizar aquele conteúdo.
 
 O usuário pode ajustar esses valores, mas deve evitar sobrecarregar servidores.
 
@@ -298,6 +301,14 @@ A ferramenta tenta descobrir o nome nesta ordem geral:
 4. nome genérico numerado + extensão inferida pelo `Content-Type`.
 
 Diferentemente da versão original específica para documentos do Exército, o fallback atual **não presume que todo arquivo seja PDF**.
+
+Alguns sites abrem documentos por meio de uma página visualizadora, por exemplo:
+
+```text
+/viewer/index.html?file=https%3A%2F%2Fsite.exemplo%2Fdocumento.pdf
+```
+
+Quando o parâmetro contém uma URL que aponta claramente para um tipo de arquivo reconhecido, o Grabber usa a URL direta do documento em vez da página do visualizador.
 
 ---
 
