@@ -9,6 +9,7 @@ GUI / CLI
    │
    ├── descoberta de links
    │    ├── automático
+   │    │    └── foco opcional na região principal da página
    │    ├── HTML genérico
    │    ├── Joomla/PhocaDownload
    │    ├── avançado (CSS/regex)
@@ -36,6 +37,7 @@ Contém o código que não depende da GUI:
 - sessão HTTP;
 - regras de descoberta;
 - crawler por profundidade;
+- foco semântico opcional na região principal da página;
 - paginação;
 - `robots.txt`;
 - normalização de URLs;
