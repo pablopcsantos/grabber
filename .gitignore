@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.venv-*/
+build/
+dist/
+*.spec
+grabber_settings.json
+downloads/
+*.part
+.DS_Store
+Thumbs.db

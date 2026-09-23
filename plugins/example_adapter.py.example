@@ -1,0 +1,11 @@
+# Renomeie este arquivo para .py somente se quiser ativá-lo.
+ADAPTER_NAME = "Exemplo"
+
+
+def match_link(anchor, url: str, page_url: str) -> bool:
+    return "/downloads-customizados/" in url
+
+
+def find_next_page(soup, page_url: str) -> str | None:
+    link = soup.select_one("a.next-custom")
+    return link.get("href") if link else None

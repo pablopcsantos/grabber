@@ -1,0 +1,36 @@
+name: Build Windows portable executable
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-build.txt
+      - name: Build portable EXE
+        shell: pwsh
+        run: |
+          $extra = @()
+          if (Test-Path "assets/grabber.ico") {
+            $extra += "--icon=assets/grabber.ico"
+            $extra += "--add-data=assets/grabber.ico;assets"
+          }
+          if (Test-Path "assets/grabber.png") {
+            $extra += "--add-data=assets/grabber.png;assets"
+          }
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name Grabber @extra app.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Grabber-Windows
+          path: dist/Grabber.exe
