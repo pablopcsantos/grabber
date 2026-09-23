@@ -107,9 +107,9 @@ Critérios:
 Antes da primeira versão estável, o projeto deve ser testado em websites públicos reais representativos de:
 
 - [ ] Joomla/PhocaDownload;
-- [ ] página HTML com links diretos para PDF/DOC/ZIP — FCC analisada parcialmente; `robots.txt` bloqueou a coleta padrão, portanto ainda não conta como cenário concluído;
+- [ ] página HTML com links diretos para PDF/DOC/ZIP — IADES já apresentou descoberta real bem-sucedida; falta confirmar completude da lista e downloads para encerrar o cenário;
 - [ ] site com paginação tradicional;
-- [ ] site em que arquivos aparecem em páginas internas (`crawl depth` 1 ou 2);
+- [ ] site em que arquivos aparecem em páginas internas (`crawl depth` 1 ou 2) — Edudata já apresentou descoberta real bem-sucedida via seção interna; falta confirmar completude da lista e downloads;
 - [ ] site que exige seletor CSS personalizado;
 - [ ] site que exige regex personalizada;
 - [x] lista manual de URLs — comportamento coberto por testes locais e pelo motor independente do scraper.
