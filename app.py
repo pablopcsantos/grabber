@@ -37,7 +37,7 @@ from core import (
 
 
 APP_NAME = "Grabber"
-APP_VERSION = "0.3.1-dev"
+APP_VERSION = "0.3.2-dev"
 
 THEMES = {
     "dark": {
