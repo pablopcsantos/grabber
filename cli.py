@@ -31,6 +31,11 @@ def parse_args():
     p.add_argument("--allow-external", action="store_true")
     p.add_argument("--ignore-robots", action="store_true")
     p.add_argument("--probe-ambiguous", action="store_true", help="Sonda links ambíguos com HEAD/Content-Type.")
+    p.add_argument(
+        "--scan-whole-page",
+        action="store_true",
+        help="No modo auto, desativa o foco na região principal e analisa menus/rodapés também.",
+    )
     p.add_argument("--plugins-dir", default="./plugins", help="Pasta de adaptadores Python externos usados no modo auto.")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--links-out")
@@ -60,6 +65,7 @@ def main() -> int:
             href_regex=args.href_regex,
             probe_ambiguous=bool(args.probe_ambiguous),
             probe_timeout=min(max(2, args.timeout), 30),
+            prefer_main_content=not args.scan_whole_page,
             plugin_dir=args.plugins_dir,
         )
         result = discover_links(session, args.url, options, log=log)
