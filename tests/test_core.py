@@ -31,6 +31,14 @@ class QuietHandler(SimpleHTTPRequestHandler):
         super().do_HEAD()
 
     def do_GET(self):
+        if urlparse(self.path).path == "/robots.txt":
+            body = b"User-agent: *\nDisallow: /blocked.html\n"
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if urlparse(self.path).path == "/ambiguous":
             body = b"pdfdata"
             self.send_response(200)
@@ -64,6 +72,11 @@ class CoreIntegrationTests(unittest.TestCase):
         (root / "advanced.html").write_text('<div id="docs"><a href="files/a.pdf?token=1">A</a></div><a href="files/b.zip">B</a>', encoding="utf-8")
         (root / "ambiguous.html").write_text('<a href="ambiguous?id=123">Baixar documento</a>', encoding="utf-8")
         (root / "plugin.html").write_text('<a href="asset.special">Arquivo especial</a>', encoding="utf-8")
+        (root / "wrapped.html").write_text(
+            '<a href="viewer/index.html?file=%2Ffiles%2Fa.pdf">Abrir PDF no visualizador</a>',
+            encoding="utf-8",
+        )
+        (root / "blocked.html").write_text('<a href="files/a.pdf">PDF bloqueado pelo robots</a>', encoding="utf-8")
         (root / "plugins" / "special.py").write_text(
             'ADAPTER_NAME = "SpecialTest"\n\n'
             'def match_link(anchor, url, page_url):\n'
@@ -160,6 +173,33 @@ class CoreIntegrationTests(unittest.TestCase):
         self.assertTrue(result.download_links[0].endswith("asset.special"))
         self.assertIn("SpecialTest", result.plugins_loaded)
         self.assertIn("plugin:SpecialTest", result.detected_mode)
+
+    def test_embedded_file_url_is_unwrapped(self):
+        result = discover_links(
+            self.session,
+            [self.url("wrapped.html")],
+            DiscoveryOptions(mode="auto", respect_robots=False, delay=0),
+        )
+        self.assertEqual(len(result.download_links), 1)
+        self.assertTrue(result.download_links[0].endswith("/files/a.pdf"))
+        self.assertIn("embedded-file", result.detected_mode)
+
+    def test_robots_disallow_is_reported(self):
+        result = discover_links(
+            self.session,
+            [self.url("blocked.html")],
+            DiscoveryOptions(mode="generic", respect_robots=True, delay=0),
+        )
+        self.assertEqual(result.download_links, [])
+        self.assertEqual(result.robots_blocked, [self.url("blocked.html")])
+        self.assertTrue(any("robots.txt não permite coletar" in w for w in result.warnings))
+
+        result_allowed = discover_links(
+            self.session,
+            [self.url("blocked.html")],
+            DiscoveryOptions(mode="generic", respect_robots=False, delay=0),
+        )
+        self.assertEqual(len(result_allowed.download_links), 1)
 
     def test_discovery_can_be_cancelled(self):
         event = threading.Event()
