@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.1-dev
+
+- mensagem específica na GUI quando uma coleta é bloqueada por `robots.txt`;
+- rótulo da opção alterado para **Respeitar robots.txt (recomendado)**;
+- registro explícito das URLs bloqueadas por `robots.txt` no resultado da descoberta;
+- suporte a links de visualizadores que carregam o arquivo real em parâmetros como `file=`/`url=`;
+- teste automatizado para URL de arquivo embutida em visualizador;
+- teste automatizado para bloqueio por `robots.txt`;
+- documentação do teste manual com a Fundação Carlos Chagas (FCC).
+
 ## 0.3.0-dev
 
 ### Adicionado
