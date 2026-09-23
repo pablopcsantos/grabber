@@ -12,6 +12,7 @@ GUI / CLI
    │    ├── HTML genérico
    │    ├── Joomla/PhocaDownload
    │    ├── avançado (CSS/regex)
+   │    ├── API JSON
    │    ├── sondagem HEAD/Content-Type
    │    └── plugins externos confiáveis
    │
@@ -39,6 +40,7 @@ Contém o código que não depende da GUI:
 - `robots.txt`;
 - normalização de URLs;
 - sondagem opcional de links ambíguos;
+- descoberta recursiva em APIs JSON e paginação simples;
 - integração com adaptadores externos;
 - download e cancelamento;
 - nomes de arquivos;
