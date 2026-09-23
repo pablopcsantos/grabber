@@ -324,7 +324,7 @@ def extract_json_next_urls(data, base_url: str) -> list[str]:
         if not isinstance(raw, str):
             return
         full = normalize_url(base_url, raw.strip())
-        if full and not looks_like_direct_file(full) and full not in seen:
+        if full and full not in seen:
             seen.add(full)
             found.append(full)
 
