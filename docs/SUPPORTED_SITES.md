@@ -119,3 +119,26 @@ O projeto **não foi concebido para contornar** CAPTCHA, desafios de navegador, 
 ## Estado da validação
 
 A lógica dessas classes possui testes automatizados locais. Testes em websites públicos reais e os resultados específicos de cada classe serão registrados em [`TEST_MATRIX.md`](TEST_MATRIX.md) antes da versão 1.0.
+
+
+---
+
+## Caso real observado: Fundação Carlos Chagas (FCC)
+
+Em um teste manual realizado em **23/09/2026** com a página:
+
+```text
+https://www.concursosfcc.com.br/concursos/alems125/index.html
+```
+
+o Grabber, com a configuração padrão, interrompeu a coleta porque o `robots.txt` do site não autorizou aquela URL. Esse comportamento é esperado quando **Respeitar robots.txt (recomendado)** está habilitado.
+
+A página possui uma seção pública de **Links e Arquivos**, mas vários documentos são apresentados por um visualizador intermediário. Um padrão observado é conceitualmente semelhante a:
+
+```text
+/rybena/web/index.html?file=https://www.concursosfcc.com.br/.../documento.pdf
+```
+
+A partir da versão `0.3.1-dev`, o Grabber reconhece esse padrão de URL embutida e extrai o endereço direto do documento quando ele possui extensão de arquivo conhecida.
+
+**Estado do teste:** parcial. A estrutura da página e o bloqueio por `robots.txt` foram observados, mas não foi registrado como teste de download bem-sucedido porque, com a política padrão, a coleta foi corretamente interrompida.
