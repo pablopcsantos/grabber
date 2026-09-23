@@ -1,4 +1,4 @@
-# Grabber
+# Grabber - Web Crawler & Bulk Downloader
 
 Aplicação desktop portátil para **descobrir e baixar arquivos públicos em massa a partir de websites**, com suporte a diferentes estratégias de descoberta de links e possibilidade de uso por pessoas sem familiaridade com linha de comando.
 
