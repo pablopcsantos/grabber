@@ -1,5 +1,9 @@
 # Grabber - Web Crawler & Bulk Downloader
 
+*Read this in other languages: [English](README-en.md)*
+
+---
+
 Aplicação desktop portátil para **descobrir e baixar arquivos públicos em massa a partir de websites**, com suporte a diferentes estratégias de descoberta de links e possibilidade de uso por pessoas sem familiaridade com linha de comando.
 
 O projeto nasceu da generalização de um downloader originalmente desenvolvido para páginas Joomla/PhocaDownload. O novo núcleo não depende de um domínio específico e foi reorganizado para funcionar como um **web crawler + bulk file downloader**, usando scraping HTML apenas como uma das formas de localizar os arquivos.
